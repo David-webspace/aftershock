@@ -18,6 +18,7 @@ dependencies = [
 dev = [
     "pandas>=2.2",
     "pytest>=8.3",
+    "scipy>=1.18.1",
 ]
 
 [tool.pytest.ini_options]

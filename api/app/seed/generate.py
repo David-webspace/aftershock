@@ -208,7 +208,7 @@ def generate() -> dict:
                 po_seq += 1
                 pos.append({"po_no": f"PO{po_seq:06d}", "plant": plant, "sourcing_id": src["id"],
                             "qty": int(weekly_qty * rng.uniform(0.85, 1.15)), "order_day": due - src["lead_days"], "due_day": due,
-                            "mode": mode, "shipped": due - transit <= 0})
+                            "mode": mode, "transit_days": transit, "shipped": due - transit <= 0})
 
     # 客戶訂單（未來 8 週）
     customers = ["CUST-A01", "CUST-B07", "CUST-C12", "CUST-D03", "CUST-E21"]

@@ -117,6 +117,7 @@ class PurchaseOrder(Base):
     order_day: Mapped[int] = mapped_column(Integer)
     due_day: Mapped[int] = mapped_column(Integer)
     mode: Mapped[str] = mapped_column(String(8))  # truck／sea／air
+    transit_days: Mapped[int] = mapped_column(Integer)
     shipped: Mapped[bool] = mapped_column(Boolean)
 
 
