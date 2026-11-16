@@ -4,11 +4,12 @@
 
 目前進度：
 - M1 真實資料擷取（USGS 事件與 ShakeMap 震度網格、OpenStreetMap 工業區座標、匯率）與合成採購資料
-- M2 影響判定（震度分級，規則見 [rules.py](api/app/impact/rules.py)）與曝險計算：每座工廠每個料件的可撐天數、預估斷料日（停工後依供應商產能分批補貨）、延誤量、受影響客戶訂單；以獨立實作的標準答案逐筆比對六起真實地震資料來源與真實度界線見 [DATA_SOURCES.md](DATA_SOURCES.md)。
+- M2 影響判定（震度分級，規則見 [rules.py](api/app/impact/rules.py)）與曝險計算：每座工廠每個料件的可撐天數、預估斷料日（停工後依供應商產能分批補貨）、延誤量、受影響客戶訂單；以獨立實作的標準答案逐筆比對六起真實地震
+- M3 詢問流程：每家受影響供應商一封詢問信草稿（依供應商語言的固定範本）→ 負責該料件類別的採購核准才寄出（寄到本機 Mailpit）→ 模擬供應商依實際狀況回信（完整、只說一半、含糊、不回）→ 模型解析成各廠區狀態，程式驗證（依據必須逐字出自原文、停工必須有恢復日）→ 通過的回饋到曝險計算，沒通過的交人確認 → 24 小時沒有可用回覆自動產生追問草稿資料來源與真實度界線見 [DATA_SOURCES.md](DATA_SOURCES.md)。
 
 ```bash
 cp .env.example .env            # 填 POSTGRES_PASSWORD，並同步到 DATABASE_URL
-docker compose up -d db
+docker compose up -d db mailpit   # Mailpit 網頁介面 http://localhost:8026
 cd api && uv sync
 set -a && . ../.env && set +a
 uv run alembic upgrade head

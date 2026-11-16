@@ -21,6 +21,7 @@ from sqlalchemy import delete, insert
 
 from app.config import settings
 from app.db import SessionLocal
+from app.ingest.sites import SRC as SITES_YAML
 from app.ingest.sites import load as load_sites
 from app.models import (BomLine, Contact, CustomerOrder, Inventory, Part, Plant, PlantProduct, Product, PurchaseOrder, Site,
                         Sourcing, Supplier, SupplierSite)
@@ -79,6 +80,14 @@ def _name(rng: np.random.Generator, country: str, commodity: str, used: set[str]
             return name
 
 
+def _english_name(site: dict) -> str:
+    """信件用的英文園區名：取 sites.yaml 查詢字串中第一個拉丁字母寫的（人工整理過），沒有才用 OpenStreetMap 的地名。
+    OSM 的地名可能是園區內的地標（郵局、機場），不適合寫進信裡。"""
+    spec = next(x for x in yaml.safe_load(SITES_YAML.read_text()) if x["key"] == site["key"])
+    latin = [q for q in spec["queries"] if q.isascii()]
+    return latin[0] if latin else site["osm_name"].split(", ")[0]
+
+
 def _pick_country(rng: np.random.Generator, weights: dict[str, int]) -> str:
     keys = list(weights)
     p = np.array([weights[k] for k in keys], dtype=float)
@@ -87,7 +96,7 @@ def _pick_country(rng: np.random.Generator, weights: dict[str, int]) -> str:
 
 def generate() -> dict:
     rng = np.random.default_rng(SEED)
-    sites = load_sites()
+    sites = [{**s, "name_en": _english_name(s)} for s in load_sites()]
     by_country = defaultdict(list)
     for s in sites:
         by_country[s["country"]].append(s["key"])

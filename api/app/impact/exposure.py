@@ -3,7 +3,7 @@
 規格（評測的標準答案 app/evals/oracle.py 依同一份規格另外實作）：
 
 1. 廠區影響：每個供應商廠區與自有工廠依所在座標取 ShakeMap 震度，套 rules.level_for 得到等級與規劃停工天數 O。
-   可用 outage_overrides 依廠區覆寫（收到供應商回覆後用實際狀況）。
+   outage_overrides 以「供應商廠區」為單位覆寫停工天數（收到供應商回覆或人工確認後，用實際狀況取代規劃假設）。
 2. 受影響的「工廠 × 料件」：該料件任一合格來源的廠區等級 ≥「需要確認」。週用量 W＝Σ 成品週需求 × BOM 用量，日用量 d＝W／7。
 3. 供給推估（第 1～H 天）：
    - 每個來源的「批次」＝既有採購單＋尚未下的單（最後一張採購單之後每 7 天一批 W×分配比例，運輸天數同該來源）。
@@ -79,7 +79,7 @@ def _rows(db: Session, sql: str) -> list[dict]:
     return [dict(r) for r in db.execute(text(sql)).mappings()]
 
 
-def site_impacts(db: Session, event_id: str, overrides: dict[str, int] | None = None) -> dict[str, SiteImpact]:
+def site_impacts(db: Session, event_id: str) -> dict[str, SiteImpact]:
     out: dict[str, SiteImpact] = {}
     used = _rows(db, """
         SELECT s.key, s.name, s.country, s.lat, s.lon, ss.id AS supplier_site_id, sp.id AS supplier_id, sp.name AS supplier_name,
@@ -91,9 +91,8 @@ def site_impacts(db: Session, event_id: str, overrides: dict[str, int] | None = 
         if r["key"] not in out:
             sh = shaking_at(event_id, r["lat"], r["lon"])
             lv = level_for(sh.mmi if sh else None)
-            outage = (overrides or {}).get(r["key"], lv.planning_outage_days)
             out[r["key"]] = SiteImpact(r["key"], r["name"], r["country"], r["lat"], r["lon"], sh.mmi if sh else None,
-                                       sh.pga_g if sh else None, lv, outage)
+                                       sh.pga_g if sh else None, lv, lv.planning_outage_days)
         if r["plant"]:
             out[r["key"]].plants.append(r["plant"])
         else:
@@ -113,7 +112,8 @@ def _project(on_hand: int, daily: float, arrivals: dict[int, int], horizon: int)
 
 def assess(db: Session, scenario_key: str, horizon: int = HORIZON, outage_overrides: dict[str, int] | None = None) -> Assessment:
     sc = scenarios.get(scenario_key)
-    sites = site_impacts(db, sc["event_id"], outage_overrides)
+    sites = site_impacts(db, sc["event_id"])
+    overrides = outage_overrides or {}
     site_of_ss = {s["supplier_site_id"]: s_key for s_key, si in sites.items() for s in si.suppliers}
 
     weekly = defaultdict(float)
@@ -153,7 +153,8 @@ def assess(db: Session, scenario_key: str, horizon: int = HORIZON, outage_overri
             arr: dict[int, int] = defaultdict(int)
             at_risk = 0
             for s in srcs:
-                outage = sites[site_of_ss[s["supplier_site_id"]]].outage_days if with_quake else 0
+                planned = sites[site_of_ss[s["supplier_site_id"]]].outage_days
+                outage = overrides.get(s["supplier_site_id"], planned) if with_quake else 0
                 last, transit = last_due.get((plant, s["id"]), (0, 7))
                 lots = [(po["due_day"], po["qty"], po["transit_days"], po["shipped"]) for po in pos[(plant, s["id"])]]
                 if s["share_pct"] > 0:

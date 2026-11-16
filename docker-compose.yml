@@ -15,5 +15,12 @@ services:
       timeout: 3s
       retries: 20
 
+  # 假信箱：所有寄出的信都進這裡，不會到達任何真實信箱。網頁介面 http://localhost:8026
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "127.0.0.1:${MAIL_UI_PORT:-8026}:8025"
+      - "127.0.0.1:${MAIL_SMTP_PORT:-1026}:1025"
+
 volumes:
   pgdata:
