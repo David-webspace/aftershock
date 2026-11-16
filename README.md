@@ -6,11 +6,12 @@
 - M1 真實資料擷取（USGS 事件與 ShakeMap 震度網格、OpenStreetMap 工業區座標、匯率）與合成採購資料
 - M2 影響判定（震度分級，規則見 [rules.py](api/app/impact/rules.py)）與曝險計算：每座工廠每個料件的可撐天數、預估斷料日（停工後依供應商產能分批補貨）、延誤量、受影響客戶訂單；以獨立實作的標準答案逐筆比對六起真實地震
 - M3 詢問流程：每家受影響供應商一封詢問信草稿（依供應商語言的固定範本）→ 負責該料件類別的採購核准才寄出（寄到本機 Mailpit）→ 模擬供應商依實際狀況回信（完整、只說一半、含糊、不回）→ 模型解析成各廠區狀態，程式驗證（依據必須逐字出自原文、停工必須有恢復日）→ 通過的回饋到曝險計算，沒通過的交人確認 → 24 小時沒有可用回覆自動產生追問草稿
-- M4 補救方案：每個會斷料的料件建一個混合整數規劃（OR-Tools／SCIP，庫存逐日檢查），在追加訂單（海運／空運）、工廠間調撥、啟用備援來源、接受缺料之間取捨，產出最低成本、平衡、最少缺料三個方案；成本與時間假設集中在 [assumptions.py](api/app/plan/assumptions.py)。主管選定後產生追加出貨請求（供應商語言）與內部調撥通知，一樣要核准才寄出，且信中數量只能是方案中的數字。驗證：不行動時與曝險計算的斷料日一致、方案逐日重播可行、小型問題對照暴力搜尋最佳值相同資料來源與真實度界線見 [DATA_SOURCES.md](DATA_SOURCES.md)。
+- M4 補救方案：每個會斷料的料件建一個混合整數規劃（OR-Tools／SCIP，庫存逐日檢查），在追加訂單（海運／空運）、工廠間調撥、啟用備援來源、接受缺料之間取捨，產出最低成本、平衡、最少缺料三個方案；成本與時間假設集中在 [assumptions.py](api/app/plan/assumptions.py)。主管選定後產生追加出貨請求（供應商語言）與內部調撥通知，一樣要核准才寄出，且信中數量只能是方案中的數字。驗證：不行動時與曝險計算的斷料日一致、方案逐日重播可行、小型問題對照暴力搜尋最佳值相同
+- M5 前端（http://localhost:3400）：應變案頁以 USGS ShakeMap 等震度線為底的地圖、標出每個受影響廠區震度的「震度尺」、事件時鐘、供應商現況（人工確認）、信件核准、斷料風險、補救方案比較與選定；首頁可重播六起真實地震，或直接從 USGS 最近 7 天的即時地震開案資料來源與真實度界線見 [DATA_SOURCES.md](DATA_SOURCES.md)。
 
 ```bash
 cp .env.example .env            # 填 POSTGRES_PASSWORD，並同步到 DATABASE_URL
-docker compose up -d db mailpit   # Mailpit 網頁介面 http://localhost:8026
+docker compose up -d --build      # 網頁 http://localhost:3400，Mailpit http://localhost:8026
 cd api && uv sync
 set -a && . ../.env && set +a
 uv run alembic upgrade head

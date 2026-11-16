@@ -1,0 +1,68 @@
+@import "tailwindcss";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/barlow-condensed/500.css";
+@import "@fontsource/barlow-condensed/600.css";
+@import "leaflet/dist/leaflet.css";
+
+/* aftershock：測量圖紙的冷灰底、墨色文字。顏色只用來表示兩件事：震度（USGS 慣用色階）與處理狀態 */
+@theme {
+  --color-paper: #e9edf0;
+  --color-sheet: #f8fafb;
+  --color-ink: #0f1a24;
+  --color-muted: #586473;
+  --color-rule: #c6cfd7;
+  --color-action: #0e5560;       /* 主要操作：深青 */
+  --color-action-deep: #093c44;
+  --color-action-wash: #dcecee;
+  --color-ok: #2c7a50;           /* 已回覆、正常 */
+  --color-wait: #b97c0c;         /* 待確認 */
+  --color-wait-wash: #f8ecd2;
+  --color-stop: #b8322a;         /* 停工、斷料、拒絕 */
+  --color-stop-wash: #f6dfdc;
+
+  /* 震度色階（MMI IV～X），與 USGS ShakeMap 的配色慣例一致 */
+  --color-mmi-4: #80ffff;
+  --color-mmi-5: #7aff93;
+  --color-mmi-6: #ffff00;
+  --color-mmi-7: #ffc800;
+  --color-mmi-8: #ff9100;
+  --color-mmi-9: #ff0000;
+  --color-mmi-10: #c80000;
+
+  --font-sans: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-cond: "Barlow Condensed", "PingFang TC", sans-serif;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-action);
+  outline-offset: 2px;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: #dfe5ea;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

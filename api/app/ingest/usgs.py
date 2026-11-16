@@ -23,14 +23,19 @@ API = "https://earthquake.usgs.gov/fdsnws/event/1/query"
 NS = {"s": "http://earthquake.usgs.gov/eqcenter/shakemap"}
 FIELDS = ("MMI", "PGA", "PGV")
 DIR = settings.data_dir / "real" / "usgs"
+LIVE_DIR = settings.data_dir / "live" / "usgs"  # 執行時才抓的即時事件，不進 git
+
+
+def _dir(event_id: str) -> Path:
+    return DIR / event_id if (DIR / event_id).exists() else LIVE_DIR / event_id
 
 
 def _client() -> httpx.Client:
     return httpx.Client(timeout=120, follow_redirects=True, headers={"user-agent": "aftershock-research/0.1"})
 
 
-def fetch(event_id: str) -> Path:
-    out = DIR / event_id
+def fetch(event_id: str, live: bool = False) -> Path:
+    out = (LIVE_DIR if live else DIR) / event_id
     out.mkdir(parents=True, exist_ok=True)
     with _client() as c:
         detail = c.get(API, params={"eventid": event_id, "format": "geojson"}).raise_for_status().json()
@@ -72,12 +77,12 @@ class Shaking:
 
 @lru_cache(maxsize=16)
 def _grid(event_id: str) -> dict[str, np.ndarray]:
-    with np.load(DIR / event_id / "grid.npz") as z:
+    with np.load(_dir(event_id) / "grid.npz") as z:
         return {k: z[k] for k in z.files}
 
 
 def event(event_id: str) -> dict:
-    return json.loads((DIR / event_id / "event.json").read_text())
+    return json.loads((_dir(event_id) / "event.json").read_text())
 
 
 def shaking_at(event_id: str, lat: float, lon: float) -> Shaking | None:

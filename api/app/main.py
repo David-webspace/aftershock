@@ -1,6 +1,9 @@
 """aftershock API。權限一律依登入身分在伺服器端判斷：採購只看得到自己負責料件類別的供應商往來。"""
 
 import logging
+import time
+
+import httpx
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel, Field
@@ -12,6 +15,7 @@ from app.auth import COOKIE, LOGIN_FAILED, Principal, authenticate, current_prin
 from app.config import settings
 from app.db import engine, get_db
 from app.impact.exposure import assess
+from app.ingest import usgs
 from app.llm import get_llm, not_configured
 from app.models import AuditLog, Incident
 from app.ratelimit import SlidingWindow
@@ -80,15 +84,20 @@ class OpenIn(BaseModel):
 
 @app.post("/api/incidents")
 def incident_open(body: OpenIn, p: Principal = Depends(require_role(*WORKERS)), db: Session = Depends(get_db)) -> dict:
-    if body.scenario not in scenarios.all_scenarios():
+    if not scenarios.is_valid(body.scenario):
         raise HTTPException(400, "沒有這個情境")
+    try:
+        scenarios.get(body.scenario)
+    except (KeyError, httpx.HTTPError):
+        # 即時事件可能還沒有 ShakeMap（通常震後數分鐘到一小時才發布），沒有震度資料就無法判斷影響
+        raise HTTPException(409, "USGS 尚未發布這起地震的震度資料（ShakeMap），請稍後再試")
     return {"id": wf.open_incident(db, body.scenario, p).id}
 
 
 @app.get("/api/incidents")
 def incident_list(_: Principal = Depends(require_role(*WORKERS)), db: Session = Depends(get_db)) -> list[dict]:
     rows = db.scalars(select(Incident).order_by(Incident.id.desc()).limit(50)).all()
-    return [{"id": i.id, "scenario": i.scenario_key, "label": scenarios.all_scenarios()[i.scenario_key]["label"], "status": i.status,
+    return [{"id": i.id, "scenario": i.scenario_key, "label": scenarios.get(i.scenario_key)["label"], "status": i.status,
              "sim_hours": i.sim_hours, "created_at": i.created_at.isoformat(), "created_by": i.created_by} for i in rows]
 
 
@@ -215,3 +224,58 @@ def plan_choose(incident_id: int, body: ChooseIn, p: Principal = Depends(require
     # 快照存固定格式的說明即可；模型說明只在比較方案時顯示，不重複呼叫
     d = execute.choose(db, inc, body.profile, p, None)
     return {"plan_id": d.id, "profile": d.profile}
+
+
+# ── 地圖與即時地震 ─────────────────────────────────────────
+
+
+@app.get("/api/incidents/{incident_id}/contours")
+def contours(incident_id: int, _: Principal = Depends(require_role(*WORKERS)), db: Session = Depends(get_db)) -> Response:
+    sc = scenarios.get(_incident(db, incident_id).scenario_key)
+    path = usgs._dir(sc["event_id"]) / "cont_mmi.json"
+    return Response(path.read_bytes(), media_type="application/json")
+
+
+@app.get("/api/map/sites")
+def map_sites(_: Principal = Depends(require_role(*WORKERS)), db: Session = Depends(get_db)) -> list[dict]:
+    rows = db.execute(text("""
+        SELECT s.key, s.name, s.country, s.lat, s.lon, s.precision, COUNT(DISTINCT ss.supplier_id) AS suppliers,
+               STRING_AGG(DISTINCT p.key, ',') AS plants
+        FROM sites s LEFT JOIN supplier_sites ss ON ss.site_key = s.key LEFT JOIN plants p ON p.site_key = s.key
+        GROUP BY s.key HAVING COUNT(ss.id) > 0 OR COUNT(p.key) > 0 ORDER BY s.key""")).mappings()
+    return [{**dict(r), "plants": r["plants"].split(",") if r["plants"] else []} for r in rows]
+
+
+_live_cache: dict = {"at": 0.0, "data": None}
+LIVE_FEED = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson"
+
+
+@app.get("/api/live")
+def live(_: Principal = Depends(require_role(*WORKERS)), db: Session = Depends(get_db)) -> dict:
+    """USGS 最近 7 天規模 4.5 以上的地震；列出離我們供應商或工廠 500 公里內的。快取 5 分鐘，避免每次開頁都打 USGS。"""
+    if _live_cache["data"] is None or time.time() - _live_cache["at"] > 300:
+        try:
+            feed = httpx.get(LIVE_FEED, timeout=15).raise_for_status().json()
+        except httpx.HTTPError:
+            log.exception("USGS feed unavailable")
+            return {"events": [], "error": "暫時連不上 USGS 即時資料"}
+        _live_cache.update(at=time.time(), data=feed)
+    sites = [dict(r) for r in db.execute(text(
+        "SELECT DISTINCT s.key, s.name, s.lat, s.lon FROM sites s LEFT JOIN supplier_sites ss ON ss.site_key = s.key "
+        "LEFT JOIN plants p ON p.site_key = s.key WHERE ss.id IS NOT NULL OR p.key IS NOT NULL")).mappings()]
+    events = []
+    for f in _live_cache["data"]["features"]:
+        lon, lat, depth = f["geometry"]["coordinates"]
+        near = sorted(((_km(lat, lon, s["lat"], s["lon"]), s["name"]) for s in sites))[:3]
+        if near and near[0][0] <= 500:
+            p = f["properties"]
+            events.append({"id": f["id"], "magnitude": p["mag"], "place": p["place"], "time": p["time"], "depth_km": depth,
+                           "shakemap": "shakemap" in (p.get("types") or ""), "url": p["url"],
+                           "nearest": [{"site": n, "km": round(d)} for d, n in near]})
+    return {"events": sorted(events, key=lambda e: -e["time"])[:20], "error": None}
+
+
+def _km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    from math import asin, cos, radians, sin, sqrt
+    a = sin(radians(lat2 - lat1) / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(radians(lon2 - lon1) / 2) ** 2
+    return 6371 * 2 * asin(sqrt(a))
