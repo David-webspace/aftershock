@@ -62,6 +62,7 @@ class Exposure:
     models: list[str]
     orders_at_risk: list[dict]
     sources: list[dict]
+    arrivals: dict[int, int] = field(default_factory=dict)  # 第 t 天到貨量（已含地震影響），給補救方案求解器當起點
 
     @property
     def quake_caused(self) -> bool:
@@ -126,8 +127,8 @@ def assess(db: Session, scenario_key: str, horizon: int = HORIZON, outage_overri
     for (_, p), w in weekly.items():
         part_weekly[p] += w
     sources = defaultdict(list)
-    for r in _rows(db, "SELECT so.id, so.part_no, so.supplier_site_id, so.share_pct, so.weekly_capacity, sp.name AS supplier, "
-                       "sp.id AS supplier_id "
+    for r in _rows(db, "SELECT so.id, so.part_no, so.supplier_site_id, so.share_pct, so.weekly_capacity, so.price_usd::float AS price_usd, "
+                       "sp.name AS supplier, sp.id AS supplier_id "
                        "FROM sourcing so JOIN supplier_sites ss ON ss.id = so.supplier_site_id JOIN suppliers sp ON sp.id = ss.supplier_id "
                        "WHERE so.qualified"):
         sources[r["part_no"]].append(r)
@@ -185,7 +186,10 @@ def assess(db: Session, scenario_key: str, horizon: int = HORIZON, outage_overri
             stockout_day=stockout, baseline_stockout_day=_project(oh, daily, base, horizon), at_risk_po_qty=at_risk, models=models,
             orders_at_risk=[o for o in orders if stockout is not None and o["plant"] == plant and o["model"] in models
                             and o["due_day"] >= stockout],
-            sources=[{**s, "site_key": site_of_ss[s["supplier_site_id"]], "level": lv.key} for s, lv in zip(srcs, levels)]))
+            sources=[{**s, "site_key": site_of_ss[s["supplier_site_id"]], "level": lv.key,
+                      "outage_days": overrides.get(s["supplier_site_id"], sites[site_of_ss[s["supplier_site_id"]]].outage_days)}
+                     for s, lv in zip(srcs, levels)],
+            arrivals=dict(arr)))
     exposures.sort(key=lambda e: (e.stockout_day is None, e.stockout_day or 0, -e.level.rank, e.cover_days))
     return Assessment(sc, sorted(sites.values(), key=lambda s: (-s.level.rank, -(s.mmi or 0))), exposures)
 

@@ -101,9 +101,10 @@ def open_incident(db: Session, scenario_key: str, user: Principal) -> Incident:
 
 def visible_message(db: Session, msg_id: int, user: Principal) -> tuple[Message, Supplier]:
     msg = db.get(Message, msg_id)
-    sup = db.get(Supplier, msg.supplier_id) if msg else None
-    # 不是自己負責的料件類別：當成不存在（回 404），不透露有這封信
-    if msg is None or not (user.role == "manager" or (user.role == "buyer" and user.handles(sup.commodity))):
+    sup = db.get(Supplier, msg.supplier_id) if msg and msg.supplier_id else None
+    # 不是自己負責的料件類別、或是只有主管能處理的內部通知：當成不存在（回 404），不透露有這封信
+    allowed = user.role == "manager" or (user.role == "buyer" and sup is not None and user.handles(sup.commodity))
+    if msg is None or not allowed:
         raise HTTPException(404, "找不到這封信")
     return msg, sup
 
@@ -113,7 +114,7 @@ def edit_draft(db: Session, msg_id: int, user: Principal, body: str) -> Message:
     if msg.status != "draft":
         raise HTTPException(409, "只能修改草稿")
     msg.body = body
-    msg.guard_issues = guard.check(db, msg.supplier_id, msg.to_addr, msg.subject, body)
+    msg.guard_issues = guard.check(db, msg.supplier_id, msg.to_addr, msg.subject, body, msg.allowed_numbers)
     audit(db, user.username, "draft_edit", msg.incident_id, message_id=msg.id)
     db.commit()
     return msg
@@ -124,7 +125,7 @@ def approve(db: Session, msg_id: int, user: Principal) -> Message:
     if msg.status != "draft":
         raise HTTPException(409, "這封信已經處理過")
     # 核准當下再檢查一次：草稿可能在建立後被改過，聯絡人資料也可能變動
-    issues = guard.check(db, msg.supplier_id, msg.to_addr, msg.subject, msg.body)
+    issues = guard.check(db, msg.supplier_id, msg.to_addr, msg.subject, msg.body, msg.allowed_numbers)
     msg.guard_issues = issues
     if issues:
         db.commit()
@@ -132,10 +133,11 @@ def approve(db: Session, msg_id: int, user: Principal) -> Message:
     inc = db.get(Incident, msg.incident_id)
     msg.smtp_message_id = mail.send(msg.from_addr, msg.to_addr, msg.subject, msg.body)
     msg.status, msg.approved_by, msg.sim_hour = "sent", user.username, inc.sim_hours
-    db.execute(update(SiteStatus).where(SiteStatus.incident_id == inc.id, SiteStatus.supplier_id == sup.id,
-                                        SiteStatus.state.in_(["pending", "no_reply"])).values(state="inquired"))
-    _schedule_reply(db, inc, sup, msg)
-    audit(db, user.username, f"{msg.kind}_sent", inc.id, message_id=msg.id, supplier=sup.id, to=msg.to_addr)
+    if msg.kind in ("inquiry", "follow_up"):
+        db.execute(update(SiteStatus).where(SiteStatus.incident_id == inc.id, SiteStatus.supplier_id == sup.id,
+                                            SiteStatus.state.in_(["pending", "no_reply"])).values(state="inquired"))
+        _schedule_reply(db, inc, sup, msg)
+    audit(db, user.username, f"{msg.kind}_sent", inc.id, message_id=msg.id, supplier=msg.supplier_id, to=msg.to_addr)
     db.commit()
     return msg
 
@@ -252,8 +254,8 @@ def _draft_followups(db: Session, inc: Incident) -> int:
         statuses = db.scalars(select(SiteStatus).where(SiteStatus.incident_id == inc.id, SiteStatus.supplier_id == sup_id)).all()
         if all(s.state in ("replied", "confirmed") for s in statuses):
             continue
-        outs = db.scalars(select(Message).where(Message.incident_id == inc.id, Message.supplier_id == sup_id, Message.direction == "out")
-                          .order_by(Message.id.desc())).all()
+        outs = db.scalars(select(Message).where(Message.incident_id == inc.id, Message.supplier_id == sup_id, Message.direction == "out",
+                                                Message.kind.in_(["inquiry", "follow_up"])).order_by(Message.id.desc())).all()
         if not outs or outs[0].status != "sent":
             continue
         if inc.sim_hours - outs[0].sim_hour < FOLLOW_UP_AFTER_HOURS:

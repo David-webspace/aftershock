@@ -15,6 +15,7 @@ from app.impact.exposure import assess
 from app.llm import get_llm, not_configured
 from app.models import AuditLog, Incident
 from app.ratelimit import SlidingWindow
+from app.plan import execute
 from app.workflow import incident as wf
 
 log = logging.getLogger("aftershock")
@@ -138,8 +139,8 @@ def messages(incident_id: int, p: Principal = Depends(require_role(*WORKERS)), d
     cond, params = _commodity_filter(p)
     rows = db.execute(text(f"""
         SELECT m.id, m.supplier_id, sp.name AS supplier, sp.commodity, m.direction, m.kind, m.status, m.from_addr, m.to_addr,
-               m.subject, m.body, m.language, m.sim_hour, m.approved_by, m.guard_issues, m.parsed, m.parse_note
-        FROM messages m JOIN suppliers sp ON sp.id = m.supplier_id WHERE m.incident_id = :i{cond} ORDER BY m.id"""),
+               m.subject, m.body, m.language, m.sim_hour, m.approved_by, m.guard_issues, m.parsed, m.parse_note, m.plan_id
+        FROM messages m LEFT JOIN suppliers sp ON sp.id = m.supplier_id WHERE m.incident_id = :i{cond} ORDER BY m.id"""),
                       {"i": incident_id, **params}).mappings()
     return [dict(r) for r in rows]
 
@@ -192,3 +193,25 @@ def audit_log(_: Principal = Depends(require_role("sysadmin")), db: Session = De
     rows = db.scalars(select(AuditLog).order_by(AuditLog.id.desc()).limit(300)).all()
     return [{"ts": r.ts.isoformat(), "username": r.username, "event": r.event, "incident_id": r.incident_id, "detail": r.detail} for r in rows]
 
+
+
+# ── 補救方案 ─────────────────────────────────────────────
+
+
+@app.get("/api/incidents/{incident_id}/options")
+def plan_options(incident_id: int, _: Principal = Depends(require_role(*WORKERS)), db: Session = Depends(get_db)) -> dict:
+    inc = _incident(db, incident_id)
+    return execute.current_options(db, inc)
+
+
+class ChooseIn(BaseModel):
+    profile: str = Field(max_length=16)
+
+
+@app.post("/api/incidents/{incident_id}/plan")
+def plan_choose(incident_id: int, body: ChooseIn, p: Principal = Depends(require_role("manager")), db: Session = Depends(get_db)) -> dict:
+    # 選方案會產生對外承諾（追加數量）與內部調撥，只有主管能決定
+    inc = _incident(db, incident_id)
+    # 快照存固定格式的說明即可；模型說明只在比較方案時顯示，不重複呼叫
+    d = execute.choose(db, inc, body.profile, p, None)
+    return {"plan_id": d.id, "profile": d.profile}

@@ -189,9 +189,9 @@ class Message(Base):
     __tablename__ = "messages"
     id: Mapped[int] = mapped_column(primary_key=True)
     incident_id: Mapped[int] = mapped_column(ForeignKey("incidents.id", ondelete="CASCADE"), index=True)
-    supplier_id: Mapped[str] = mapped_column(ForeignKey("suppliers.id"), index=True)
+    supplier_id: Mapped[str | None] = mapped_column(ForeignKey("suppliers.id"), index=True)  # 內部通知（調撥、認證）為空
     direction: Mapped[str] = mapped_column(String(4))  # out／in
-    kind: Mapped[str] = mapped_column(String(12))  # inquiry／follow_up／reply
+    kind: Mapped[str] = mapped_column(String(16))  # inquiry／follow_up／reply／expedite／transfer／qualify
     status: Mapped[str] = mapped_column(String(16))
     from_addr: Mapped[str] = mapped_column(String(128))
     to_addr: Mapped[str] = mapped_column(String(128))
@@ -209,6 +209,21 @@ class Message(Base):
     guard_issues: Mapped[list | None] = mapped_column(JSONB)
     parsed: Mapped[dict | None] = mapped_column(JSONB)
     parse_note: Mapped[str | None] = mapped_column(Text)
+    plan_id: Mapped[int | None] = mapped_column(ForeignKey("plan_decisions.id", ondelete="CASCADE"))
+    allowed_numbers: Mapped[list | None] = mapped_column(JSONB)  # 方案信件：信中只允許出現這些數量
+
+
+class PlanDecision(Base):
+    """主管選定的補救方案（當下三個方案的完整快照，事後可追溯為什麼這樣選）。"""
+
+    __tablename__ = "plan_decisions"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    incident_id: Mapped[int] = mapped_column(ForeignKey("incidents.id", ondelete="CASCADE"), index=True)
+    profile: Mapped[str] = mapped_column(String(16))
+    snapshot: Mapped[dict] = mapped_column(JSONB)
+    explanation: Mapped[dict | None] = mapped_column(JSONB)
+    decided_by: Mapped[str] = mapped_column(String(32))
+    decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class Truth(Base):
