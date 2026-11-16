@@ -139,7 +139,14 @@ def incident_detail(incident_id: int, p: Principal = Depends(require_role(*WORKE
              "impacted_share_pct": e.impacted_share_pct, "cover_days": e.cover_days, "stockout_day": e.stockout_day,
              "orders_at_risk": len(e.orders_at_risk), "order_qty_at_risk": sum(o["qty"] for o in e.orders_at_risk)} for e in risky]},
         "model_ready": not_configured() is None,
+        "plan": _latest_plan(db, inc.id),
     }
+
+
+def _latest_plan(db: Session, incident_id: int) -> dict | None:
+    d = db.execute(text("SELECT profile, decided_by, decided_at FROM plan_decisions WHERE incident_id = :i ORDER BY id DESC LIMIT 1"),
+                   {"i": incident_id}).mappings().first()
+    return {"profile": d["profile"], "decided_by": d["decided_by"], "decided_at": d["decided_at"].isoformat()} if d else None
 
 
 @app.get("/api/incidents/{incident_id}/messages")

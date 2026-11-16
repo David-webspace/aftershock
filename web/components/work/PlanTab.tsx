@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { Action, Me, Options } from "@/lib/types";
+import type { Action, Incident, Me, Options } from "@/lib/types";
 import { post } from "./post";
 
 const MODE: Record<string, string> = { sea: "海運", air: "空運", truck: "陸運" };
@@ -13,7 +13,9 @@ function describe(a: Action): string {
   return `啟用備援來源 ${a.supplier}，認證後採購 ${a.qty.toLocaleString()} 個`;
 }
 
-export function PlanTab({ incidentId, me }: { incidentId: number; me: Me; t0: string }) {
+const PROFILE: Record<string, string> = { low_cost: "最低成本", balanced: "平衡", min_shortage: "最少缺料" };
+
+export function PlanTab({ incidentId, me, chosen }: { incidentId: number; me: Me; chosen: Incident["plan"] }) {
   const router = useRouter();
   const [data, setData] = useState<Options | null>(null);
   const [busy, setBusy] = useState(false);
@@ -38,9 +40,18 @@ export function PlanTab({ incidentId, me }: { incidentId: number; me: Me; t0: st
     router.refresh();
   }
 
+  // 已選過方案：照實顯示，避免重複選定產生重複的信件草稿；收到新的供應商狀況後仍可重新選定
+  const chosenNote = chosen && (
+    <p className="mb-3 rounded-sm bg-action-wash px-3 py-2 text-sm break-words">
+      已於 {new Date(chosen.decided_at).toLocaleString("zh-TW", { timeZone: "Asia/Taipei", hour12: false })} 由 {chosen.decided_by} 選定「{PROFILE[chosen.profile] ?? chosen.profile}」。
+      再選一次會依目前狀況重新產生信件草稿。
+    </p>
+  );
+
   if (!data) {
     return (
       <div>
+        {chosenNote}
         <p className="mb-3 text-sm break-words text-muted">
           以目前的供應商狀況（已回覆或人工確認的以實際恢復日計算）求解：追加訂單、空運、工廠間調撥、啟用備援來源與接受缺料之間的取捨。
         </p>
@@ -54,6 +65,7 @@ export function PlanTab({ incidentId, me }: { incidentId: number; me: Me; t0: st
 
   return (
     <div className="space-y-4">
+      {chosenNote}
       <p className="text-sm">
         不採取行動：<span className="num">{data.no_action.stockouts}</span> 筆斷料，影響客戶訂單 <span className="num">{data.no_action.orders_at_risk}</span> 張
       </p>
@@ -64,7 +76,7 @@ export function PlanTab({ incidentId, me }: { incidentId: number; me: Me; t0: st
               <h3 className="font-medium">{o.label}</h3>
               {me.role === "manager" && (
                 <button onClick={() => choose(o.key, o.label)} disabled={busy || !!done}
-                  className="ml-auto rounded-sm border border-action px-3 py-1 text-sm text-action hover:bg-action-wash disabled:opacity-40">選定此方案</button>
+                  className="ml-auto rounded-sm border border-action px-3 py-1 text-sm text-action hover:bg-action-wash disabled:opacity-40">{chosen ? "重新選定" : "選定此方案"}</button>
               )}
             </div>
             <dl className="mt-2 grid grid-cols-3 gap-2 text-sm">

@@ -31,6 +31,7 @@ export type Incident = {
   id: number; sim_hours: number; now: string; status: string;
   scenario: { key: string; label: string; magnitude: number; place: string; lat: number; lon: number; t0: string; max_mmi: number; usgs_url: string };
   sites: SiteImpact[]; statuses: Status[]; exposure: { checked: number; stockouts: Stockout[] }; model_ready: boolean;
+  plan: { profile: string; decided_by: string; decided_at: string } | null;
 };
 
 export type Msg = {

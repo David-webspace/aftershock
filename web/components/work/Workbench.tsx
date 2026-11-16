@@ -33,7 +33,7 @@ export function Workbench({ incident, messages, me }: { incident: Incident; mess
         {tab === "status" && <StatusTab statuses={incident.statuses} me={me} />}
         {tab === "mail" && <MailTab messages={messages} />}
         {tab === "risk" && <RiskTab incident={incident} />}
-        {tab === "plan" && <PlanTab incidentId={incident.id} me={me} t0={incident.scenario.t0} />}
+        {tab === "plan" && <PlanTab incidentId={incident.id} me={me} chosen={incident.plan} />}
       </div>
     </section>
   );
