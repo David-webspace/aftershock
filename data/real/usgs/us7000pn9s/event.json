@@ -1,0 +1,14 @@
+{
+ "id": "us7000pn9s",
+ "title": "M 7.7 - 2025 Mandalay, Burma (Myanmar) Earthquake",
+ "place": "2025 Mandalay, Burma (Myanmar) Earthquake",
+ "magnitude": 7.7,
+ "time_ms": 1743142852715,
+ "lat": 22.011,
+ "lon": 95.9363,
+ "depth_km": 10,
+ "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000pn9s",
+ "shakemap_version": "23",
+ "max_mmi": 9.953,
+ "pager_alert": "red"
+}

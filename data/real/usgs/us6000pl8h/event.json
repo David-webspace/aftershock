@@ -1,0 +1,14 @@
+{
+ "id": "us6000pl8h",
+ "title": "M 6.0 - 10 km NE of Yujing, Taiwan",
+ "place": "10 km NE of Yujing, Taiwan",
+ "magnitude": 6,
+ "time_ms": 1737389846812,
+ "lat": 23.1816,
+ "lon": 120.5448,
+ "depth_km": 16,
+ "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000pl8h",
+ "shakemap_version": "7",
+ "max_mmi": 6.189,
+ "pager_alert": "green"
+}

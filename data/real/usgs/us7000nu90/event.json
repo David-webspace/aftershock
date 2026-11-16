@@ -1,0 +1,14 @@
+{
+ "id": "us7000nu90",
+ "title": "M 6.1 - 38 km WNW of Hakui, Japan",
+ "place": "38 km WNW of Hakui, Japan",
+ "magnitude": 6.1,
+ "time_ms": 1732628823411,
+ "lat": 36.9549,
+ "lon": 136.3653,
+ "depth_km": 8,
+ "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000nu90",
+ "shakemap_version": "6",
+ "max_mmi": 5.635,
+ "pager_alert": "green"
+}

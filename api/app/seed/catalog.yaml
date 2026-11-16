@@ -1,0 +1,149 @@
+# 料件家族。類別與規格依 TI 公開參考設計 TIDA-010062（1 kW、80 Plus 鈦金、GaN 圖騰柱 PFC + 半橋 LLC、
+# 100–264 VAC 輸入、12 V／84 A 輸出）的功率級與控制電路所用元件類型校準；被動元件、磁性元件、PCB 與機構件
+# 依同級伺服器電源的常見構成補齊。品牌與料號一律虛構（ARC- 開頭）。
+#
+# commodity：採購分工（buyer 依此負責）
+# lead_weeks：正常交期區間（週）。依業界常見的交期區間設定（半導體較長、機構件較短），屬於擬真假設，不是單一來源的實測值。
+# unit_usd：單價區間（美元），同為擬真假設。
+# variants：同家族的不同規格，各自是一個料號。
+families:
+  - {key: gan_fet_600v, commodity: semiconductor, category: GaN 功率電晶體, lead_weeks: [16, 30], unit_usd: [4.5, 9.0],
+     variants: ["600 V 70 mΩ 內建驅動 QFN 8x8", "600 V 50 mΩ 內建驅動與溫度回報 QFN 12x12", "650 V 35 mΩ TOLL", "650 V 25 mΩ TOLL"]}
+  - {key: si_mosfet_lv, commodity: semiconductor, category: 低壓 MOSFET（同步整流）, lead_weeks: [12, 24], unit_usd: [0.6, 1.8],
+     variants: ["40 V 0.96 mΩ SON 5x6", "40 V 1.4 mΩ SON 5x6", "60 V 1.8 mΩ SON 5x6", "80 V 2.5 mΩ SON 5x6", "100 V 3.2 mΩ TOLL"]}
+  - {key: si_mosfet_hv, commodity: semiconductor, category: 高壓 MOSFET, lead_weeks: [14, 26], unit_usd: [1.2, 3.5],
+     variants: ["650 V 65 mΩ TO-247", "650 V 99 mΩ TO-220", "600 V 190 mΩ DPAK", "800 V 450 mΩ DPAK"]}
+  - {key: sic_diode, commodity: semiconductor, category: SiC 蕭特基二極體, lead_weeks: [14, 26], unit_usd: [0.8, 2.4],
+     variants: ["650 V 6 A TO-220", "650 V 10 A TO-220", "1200 V 10 A TO-247"]}
+  - {key: bridge_rect, commodity: semiconductor, category: 橋式整流器, lead_weeks: [10, 18], unit_usd: [0.4, 1.2],
+     variants: ["600 V 15 A GBU", "800 V 25 A GBJ"]}
+  - {key: mcu_digital_power, commodity: semiconductor, category: 數位電源 MCU, lead_weeks: [20, 40], unit_usd: [3.0, 7.5],
+     variants: ["32-bit 100 MHz 128 KB flash LQFP-48", "32-bit 120 MHz 256 KB flash LQFP-64", "32-bit 150 MHz 512 KB flash LQFP-80"]}
+  - {key: gate_driver_iso, commodity: semiconductor, category: 隔離式閘極驅動器, lead_weeks: [16, 30], unit_usd: [1.1, 2.6],
+     variants: ["雙通道 4 A/6 A 強化隔離 SOIC-16", "單通道 5 A 基本隔離 SOIC-8"]}
+  - {key: gate_driver_hb, commodity: semiconductor, category: 半橋閘極驅動器, lead_weeks: [14, 26], unit_usd: [0.6, 1.4],
+     variants: ["700 V 4 A/4 A SOIC-14", "20 V 雙通道低側 5 A SOIC-8"]}
+  - {key: digital_isolator, commodity: semiconductor, category: 數位隔離器, lead_weeks: [14, 28], unit_usd: [0.9, 2.2],
+     variants: ["強化隔離 4 通道 SOIC-16", "基本隔離 2 通道 SOIC-8"]}
+  - {key: current_sensor, commodity: semiconductor, category: 霍爾電流感測器, lead_weeks: [16, 30], unit_usd: [1.4, 3.0],
+     variants: ["±600 V 基本隔離 20 Arms SOIC-8", "強化隔離 50 A SOIC-16"]}
+  - {key: current_sense_amp, commodity: semiconductor, category: 電流感測放大器, lead_weeks: [12, 22], unit_usd: [0.3, 0.8],
+     variants: ["26 V 350 kHz SOT-23-5", "80 V 雙向 SOIC-8"]}
+  - {key: aux_flyback, commodity: semiconductor, category: 輔助電源返馳控制器, lead_weeks: [12, 24], unit_usd: [0.5, 1.2],
+     variants: ["700 V 整合開關 一次側調節 SOIC-7"]}
+  - {key: buck_conv, commodity: semiconductor, category: 降壓轉換器, lead_weeks: [10, 20], unit_usd: [0.4, 1.0],
+     variants: ["36 V 0.6 A 同步 SOT-23-6", "17 V 3 A 同步 SOT-563"]}
+  - {key: ldo, commodity: semiconductor, category: 低壓差穩壓器, lead_weeks: [8, 16], unit_usd: [0.08, 0.3],
+     variants: ["150 mA 3.3 V X2SON", "300 mA 5 V SOT-23"]}
+  - {key: opamp, commodity: semiconductor, category: 運算放大器, lead_weeks: [10, 20], unit_usd: [0.4, 1.1],
+     variants: ["雙通道 精密低雜訊 VSSOP-8", "單通道 軌對軌 SOT-23-5"]}
+  - {key: thermistor_lin, commodity: semiconductor, category: 線性熱敏電阻, lead_weeks: [8, 16], unit_usd: [0.05, 0.15],
+     variants: ["10 kΩ 1% 0603"]}
+  - {key: bulk_cap, commodity: passive, category: 鋁電解大電容, lead_weeks: [10, 20], unit_usd: [1.2, 3.8],
+     variants: ["450 V 270 µF 105°C 3000 h 卡入式", "450 V 390 µF 105°C 3000 h 卡入式", "420 V 470 µF 105°C 5000 h 卡入式"]}
+  - {key: polymer_cap, commodity: passive, category: 固態高分子電容, lead_weeks: [10, 18], unit_usd: [0.15, 0.6],
+     variants: ["16 V 470 µF 低 ESR", "16 V 820 µF 低 ESR", "25 V 330 µF 低 ESR"]}
+  - {key: mlcc, commodity: passive, category: 積層陶瓷電容, lead_weeks: [8, 18], unit_usd: [0.002, 0.08],
+     variants: ["0402 100 nF 16 V X7R", "0603 1 µF 25 V X7R", "0805 10 µF 25 V X5R", "1206 22 µF 25 V X5R", "1210 100 nF 630 V C0G", "1812 4.7 nF 2 kV C0G"]}
+  - {key: film_cap, commodity: passive, category: 薄膜電容（X2／諧振）, lead_weeks: [8, 16], unit_usd: [0.2, 0.9],
+     variants: ["X2 275 VAC 1 µF", "X2 310 VAC 0.47 µF", "諧振 630 V 33 nF PP"]}
+  - {key: y_cap, commodity: passive, category: Y 電容, lead_weeks: [6, 12], unit_usd: [0.03, 0.1],
+     variants: ["Y1 400 VAC 2.2 nF", "Y1 400 VAC 4.7 nF"]}
+  - {key: chip_res, commodity: passive, category: 晶片電阻, lead_weeks: [6, 14], unit_usd: [0.001, 0.01],
+     variants: ["0402 10 kΩ 1%", "0603 100 kΩ 0.1% 高壓分壓", "0805 4.7 Ω 1%", "2512 2 mΩ 1% 電流檢測"]}
+  - {key: varistor, commodity: passive, category: 突波吸收器, lead_weeks: [6, 12], unit_usd: [0.1, 0.4],
+     variants: ["14 mm 470 V", "20 mm 470 V"]}
+  - {key: ntc_inrush, commodity: passive, category: 湧浪抑制 NTC, lead_weeks: [6, 12], unit_usd: [0.15, 0.5],
+     variants: ["5 Ω 6 A", "2.5 Ω 8 A"]}
+  - {key: fuse, commodity: passive, category: 保險絲, lead_weeks: [6, 12], unit_usd: [0.2, 0.8],
+     variants: ["15 A 250 VAC 慢熔 陶瓷管", "20 A 250 VAC 慢熔 陶瓷管"]}
+  - {key: pfc_inductor, commodity: magnetic, category: PFC 電感, lead_weeks: [5, 9], unit_usd: [3.5, 8.0],
+     variants: ["0.13 mH 15 A 鐵粉芯", "0.25 mH 12 A 高磁通芯", "0.4 mH 10 A 鐵氧體 PQ35"]}
+  - {key: llc_transformer, commodity: magnetic, category: LLC 主變壓器, lead_weeks: [5, 10], unit_usd: [6.0, 14.0],
+     variants: ["1 kW 400 V:12 V 平面式", "2 kW 400 V:12 V 平面式", "3 kW 400 V:54 V PQ50"]}
+  - {key: res_inductor, commodity: magnetic, category: 諧振電感, lead_weeks: [5, 9], unit_usd: [1.5, 4.0],
+     variants: ["30 µH 10 A RM10", "18 µH 15 A RM12"]}
+  - {key: cm_choke, commodity: magnetic, category: 共模扼流圈, lead_weeks: [4, 8], unit_usd: [0.8, 2.5],
+     variants: ["10 mH 10 A 環形", "4.7 mH 16 A 環形", "2 mH 20 A 環形"]}
+  - {key: aux_transformer, commodity: magnetic, category: 輔助電源變壓器, lead_weeks: [4, 8], unit_usd: [0.6, 1.5],
+     variants: ["EE13 12 V／5 V 雙輸出", "EFD15 12 V 單輸出"]}
+  - {key: output_inductor, commodity: magnetic, category: 輸出濾波電感, lead_weeks: [4, 8], unit_usd: [0.4, 1.2],
+     variants: ["0.47 µH 60 A 一體成型", "1 µH 40 A 一體成型"]}
+  - {key: pcb_main, commodity: pcb, category: 主電路板, lead_weeks: [3, 6], unit_usd: [6.0, 18.0],
+     variants: ["6 層 3 oz FR-4 Tg170 160x66 mm", "8 層 4 oz FR-4 Tg170 185x73 mm", "4 層 2 oz FR-4 Tg150 120x60 mm"]}
+  - {key: pcb_ctrl, commodity: pcb, category: 控制卡電路板, lead_weeks: [3, 5], unit_usd: [1.2, 3.0],
+     variants: ["4 層 1 oz HDI 40x30 mm"]}
+  - {key: heatsink, commodity: mechanical, category: 鋁擠散熱片, lead_weeks: [3, 6], unit_usd: [1.0, 4.5],
+     variants: ["AL6063 120x30x25 mm", "AL6063 160x38x30 mm", "AL6063 銅底 180x40x30 mm"]}
+  - {key: fan, commodity: mechanical, category: 散熱風扇, lead_weeks: [6, 12], unit_usd: [3.0, 7.0],
+     variants: ["40x40x28 mm 12 V 25000 rpm 雙滾珠", "60x60x25 mm 12 V 9000 rpm 雙滾珠"]}
+  - {key: enclosure, commodity: mechanical, category: 機殼, lead_weeks: [3, 6], unit_usd: [2.5, 7.0],
+     variants: ["SGCC 鍍鋅鋼板 1U 冗餘電源", "鋁合金 壓鑄 轉接器外殼", "PC/ABS 阻燃 V-0 轉接器外殼"]}
+  - {key: connector_ac, commodity: electromechanical, category: AC 輸入插座, lead_weeks: [6, 12], unit_usd: [0.6, 2.0],
+     variants: ["IEC C14 10 A 卡扣", "IEC C20 16 A 卡扣"]}
+  - {key: connector_edge, commodity: electromechanical, category: 金手指輸出連接器, lead_weeks: [8, 14], unit_usd: [1.5, 4.0],
+     variants: ["2x25 pin 大電流 板端", "2x30 pin 大電流 板端"]}
+  - {key: busbar, commodity: mechanical, category: 銅排, lead_weeks: [3, 6], unit_usd: [0.8, 2.4],
+     variants: ["C1100 鍍錫 60 A", "C1100 鍍錫 120 A"]}
+  - {key: thermal_pad, commodity: mechanical, category: 導熱墊片, lead_weeks: [3, 6], unit_usd: [0.1, 0.5],
+     variants: ["3 W/mK 1.0 mm", "6 W/mK 0.5 mm"]}
+  - {key: label_pack, commodity: mechanical, category: 標籤與包材, lead_weeks: [2, 4], unit_usd: [0.1, 0.6],
+     variants: ["安規銘牌 耐溫 PET", "防靜電包裝袋與紙箱"]}
+
+# 成品：每項列出用到的家族變體（family:變體索引）與每台用量。
+products:
+  - {model: ARC-PSU1K2-TP, name: 1.2 kW 伺服器冗餘電源（GaN 圖騰柱 PFC＋LLC，12 V）, weekly_demand: [1800, 3200],
+     bom: {gan_fet_600v:0: 4, gan_fet_600v:1: 2, si_mosfet_lv:0: 8, mcu_digital_power:1: 2, gate_driver_iso:0: 2, digital_isolator:0: 2,
+           current_sensor:0: 1, current_sense_amp:0: 2, aux_flyback:0: 1, buck_conv:0: 2, ldo:0: 2, opamp:0: 2, thermistor_lin:0: 3,
+           bulk_cap:0: 2, polymer_cap:0: 10, mlcc:0: 120, mlcc:1: 40, mlcc:2: 24, mlcc:4: 8, film_cap:0: 2, film_cap:2: 2, y_cap:0: 4,
+           chip_res:0: 160, chip_res:1: 12, chip_res:3: 4, varistor:0: 1, ntc_inrush:0: 1, fuse:0: 1, pfc_inductor:0: 1,
+           llc_transformer:0: 1, res_inductor:0: 1, cm_choke:0: 2, aux_transformer:0: 1, output_inductor:0: 2, pcb_main:0: 1,
+           pcb_ctrl:0: 2, heatsink:0: 2, fan:0: 1, enclosure:0: 1, connector_ac:0: 1, connector_edge:0: 1, busbar:0: 2,
+           thermal_pad:0: 6, label_pack:0: 1, label_pack:1: 1}}
+  - {model: ARC-PSU2K4-TP, name: 2.4 kW 伺服器冗餘電源（GaN 圖騰柱 PFC＋LLC，12 V）, weekly_demand: [1200, 2400],
+     bom: {gan_fet_600v:2: 4, gan_fet_600v:1: 4, si_mosfet_lv:1: 12, mcu_digital_power:2: 2, gate_driver_iso:0: 4, digital_isolator:0: 2,
+           current_sensor:1: 2, current_sense_amp:0: 2, aux_flyback:0: 1, buck_conv:0: 2, ldo:0: 2, opamp:0: 2, thermistor_lin:0: 4,
+           bulk_cap:1: 2, polymer_cap:1: 14, mlcc:0: 160, mlcc:1: 60, mlcc:3: 24, mlcc:4: 12, film_cap:0: 2, film_cap:2: 4, y_cap:1: 4,
+           chip_res:0: 210, chip_res:1: 16, chip_res:3: 6, varistor:1: 1, ntc_inrush:1: 1, fuse:1: 1, pfc_inductor:1: 2,
+           llc_transformer:1: 1, res_inductor:1: 1, cm_choke:1: 2, aux_transformer:0: 1, output_inductor:0: 4, pcb_main:1: 1,
+           pcb_ctrl:0: 2, heatsink:2: 2, fan:0: 2, enclosure:0: 1, connector_ac:1: 1, connector_edge:1: 1, busbar:1: 2,
+           thermal_pad:1: 10, label_pack:0: 1, label_pack:1: 1}}
+  - {model: ARC-PSU3K0-54, name: 3 kW 54 V 資料中心電源（SiC PFC＋LLC）, weekly_demand: [600, 1400],
+     bom: {si_mosfet_hv:0: 4, sic_diode:2: 2, gan_fet_600v:3: 4, si_mosfet_lv:3: 8, mcu_digital_power:2: 2, gate_driver_iso:0: 4,
+           digital_isolator:0: 2, current_sensor:1: 2, current_sense_amp:1: 2, aux_flyback:0: 1, buck_conv:1: 2, ldo:1: 2, opamp:0: 2,
+           thermistor_lin:0: 4, bulk_cap:2: 3, polymer_cap:2: 10, mlcc:0: 180, mlcc:1: 60, mlcc:3: 20, mlcc:5: 8, film_cap:1: 2,
+           film_cap:2: 4, y_cap:1: 6, chip_res:0: 230, chip_res:1: 16, chip_res:3: 6, varistor:1: 1, ntc_inrush:1: 1, fuse:1: 1,
+           pfc_inductor:2: 2, llc_transformer:2: 1, res_inductor:1: 1, cm_choke:2: 2, aux_transformer:1: 1, output_inductor:1: 2,
+           pcb_main:1: 1, pcb_ctrl:0: 2, heatsink:2: 2, fan:1: 2, enclosure:0: 1, connector_ac:1: 1, connector_edge:1: 1, busbar:1: 2,
+           thermal_pad:1: 12, label_pack:0: 1, label_pack:1: 1}}
+  - {model: ARC-ADP100-GAN, name: 100 W USB-C GaN 筆電變壓器, weekly_demand: [9000, 16000],
+     bom: {gan_fet_600v:0: 1, si_mosfet_lv:2: 1, si_mosfet_hv:2: 1, bridge_rect:0: 1, aux_flyback:0: 1, gate_driver_hb:1: 1,
+           opamp:1: 1, bulk_cap:0: 1, polymer_cap:2: 2, mlcc:0: 30, mlcc:1: 10, mlcc:4: 2, film_cap:1: 1, y_cap:0: 1, chip_res:0: 40,
+           chip_res:2: 2, varistor:0: 1, ntc_inrush:0: 1, fuse:0: 1, cm_choke:0: 1, aux_transformer:1: 1, pcb_main:2: 1,
+           enclosure:2: 1, connector_ac:0: 1, thermal_pad:0: 2, label_pack:0: 1, label_pack:1: 1}}
+  - {model: ARC-ADP240-GAN, name: 240 W 電競筆電 GaN 變壓器, weekly_demand: [3000, 6000],
+     bom: {gan_fet_600v:0: 2, gan_fet_600v:2: 2, si_mosfet_lv:1: 2, sic_diode:0: 1, mcu_digital_power:0: 1, gate_driver_hb:0: 1,
+           current_sense_amp:0: 1, aux_flyback:0: 1, ldo:0: 1, opamp:1: 1, bulk_cap:1: 1, polymer_cap:0: 4, mlcc:0: 60, mlcc:1: 20,
+           mlcc:2: 8, mlcc:4: 4, film_cap:0: 1, film_cap:2: 1, y_cap:0: 2, chip_res:0: 80, chip_res:3: 2, varistor:0: 1,
+           ntc_inrush:0: 1, fuse:0: 1, pfc_inductor:2: 1, llc_transformer:0: 1, cm_choke:1: 1, aux_transformer:0: 1,
+           output_inductor:1: 1, pcb_main:2: 1, heatsink:0: 1, enclosure:1: 1, connector_ac:0: 1, thermal_pad:0: 4,
+           label_pack:0: 1, label_pack:1: 1}}
+
+# 自有工廠（採購方 Arcwell Electronics），位於真實工業區
+plants:
+  - {key: TW1, site: TW-GUISHAN, name: 桃園龜山廠, products: [ARC-PSU1K2-TP, ARC-PSU2K4-TP, ARC-PSU3K0-54]}
+  - {key: CN1, site: CN-CHANGAN, name: 東莞長安廠, products: [ARC-ADP100-GAN, ARC-ADP240-GAN, ARC-PSU1K2-TP]}
+  - {key: TH1, site: TH-ROJANA, name: 泰國大城府廠, products: [ARC-PSU2K4-TP, ARC-PSU3K0-54, ARC-ADP240-GAN]}
+  - {key: VN1, site: VN-VSIPBN, name: 越南北寧廠, products: [ARC-ADP100-GAN, ARC-ADP240-GAN]}
+
+# 各料件類別的供應商所在國家權重（依產業分布的擬真假設）
+sourcing_countries:
+  semiconductor: {JP: 4, TW: 4, MY: 3, PH: 2, CN: 2, TH: 1}
+  passive: {JP: 4, TW: 3, CN: 3, TH: 2, MY: 1, ID: 1}
+  magnetic: {CN: 4, TH: 3, VN: 2, PH: 2, TW: 1}
+  pcb: {TW: 4, CN: 4, TH: 2}
+  mechanical: {CN: 4, TW: 2, VN: 2, MX: 1, TH: 1}
+  electromechanical: {TW: 3, CN: 3, JP: 2, MX: 1}
+
+currency: {TW: TWD, JP: JPY, CN: CNY, TH: THB, MY: USD, VN: USD, PH: USD, MX: USD, ID: USD}
+language: {TW: zh-TW, JP: ja, CN: zh-CN, TH: en, MY: en, VN: en, PH: en, MX: en, ID: en}

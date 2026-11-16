@@ -1,0 +1,102 @@
+{
+ "source": "TWD: FRED DEXTAUS (Board of Governors of the Federal Reserve System); others: ECB reference rates via frankfurter.app",
+ "base": "USD",
+ "rates": {
+  "hualien-2024": {
+   "event_date": "2024-04-03",
+   "ecb_date": "2024-04-03",
+   "twd_date": "2024-04-03",
+   "per_usd": {
+    "USD": 1.0,
+    "TWD": 32.02,
+    "CNY": 7.2357,
+    "IDR": 15948,
+    "JPY": 151.78,
+    "MXN": 16.58,
+    "MYR": 4.755,
+    "PHP": 56.401,
+    "THB": 36.71
+   }
+  },
+  "myanmar-2025": {
+   "event_date": "2025-03-28",
+   "ecb_date": "2025-03-28",
+   "twd_date": "2025-03-28",
+   "per_usd": {
+    "USD": 1.0,
+    "TWD": 33.12,
+    "CNY": 7.2654,
+    "IDR": 16588,
+    "JPY": 150.63,
+    "MXN": 20.346,
+    "MYR": 4.4375,
+    "PHP": 57.374,
+    "THB": 33.958
+   }
+  },
+  "tohoku-2011": {
+   "event_date": "2011-03-11",
+   "ecb_date": "2011-03-11",
+   "twd_date": "2011-03-11",
+   "per_usd": {
+    "USD": 1.0,
+    "TWD": 29.56,
+    "CNY": 6.5745,
+    "IDR": 8781,
+    "JPY": 82.22,
+    "MXN": 12.0067,
+    "MYR": 3.0415,
+    "PHP": 43.688,
+    "THB": 30.46
+   }
+  },
+  "tainan-2025": {
+   "event_date": "2025-01-21",
+   "ecb_date": "2025-01-21",
+   "twd_date": "2025-01-21",
+   "per_usd": {
+    "USD": 1.0,
+    "TWD": 32.74,
+    "CNY": 7.2843,
+    "IDR": 16339,
+    "JPY": 155.7,
+    "MXN": 20.747,
+    "MYR": 4.4755,
+    "PHP": 58.531,
+    "THB": 34.065
+   }
+  },
+  "hualien-2024-08": {
+   "event_date": "2024-08-16",
+   "ecb_date": "2024-08-16",
+   "twd_date": "2024-08-16",
+   "per_usd": {
+    "USD": 1.0,
+    "TWD": 32.28,
+    "CNY": 7.1637,
+    "IDR": 15699,
+    "JPY": 148.01,
+    "MXN": 18.6884,
+    "MYR": 4.4315,
+    "PHP": 57.161,
+    "THB": 34.935
+   }
+  },
+  "noto-2024-11": {
+   "event_date": "2024-11-26",
+   "ecb_date": "2024-11-26",
+   "twd_date": "2024-11-26",
+   "per_usd": {
+    "USD": 1.0,
+    "TWD": 32.47,
+    "CNY": 7.2481,
+    "IDR": 15878,
+    "JPY": 153.14,
+    "MXN": 20.489,
+    "MYR": 4.4575,
+    "PHP": 58.962,
+    "THB": 34.605
+   }
+  }
+ }
+}

@@ -1,0 +1,78 @@
+# 真實工業區、科學園區（名稱與所在地皆為實際存在）。座標由 OpenStreetMap Nominatim 查得，
+# 寫入 data/real/sites.json（© OpenStreetMap contributors, ODbL）。queries 依序嘗試，第一個查到的為準；
+# 查到的若只是城市而非園區本身，precision 記為 city，顯示時照實標註。
+# area：查到的地址必須包含這個行政區名稱，否則換下一個查詢（同名地點很多，避免對錯縣市）。
+- {key: TW-HSP, country: TW, name: 新竹科學園區, area: "Hsinchu", queries: ["Hsinchu Science Park", "新竹科學園區", "新竹科學園區"]}
+- {key: TW-CTSP, country: TW, name: 中部科學園區（台中）, area: "Taichung", queries: ["中部科學園區 台中", "Central Taiwan Science Park"]}
+- {key: TW-STSP, country: TW, name: 南部科學園區（台南）, area: "Tainan", queries: ["南部科學園區 台南園區", "Southern Taiwan Science Park"]}
+- {key: TW-KSP, country: TW, name: 高雄科學園區（路竹）, area: "Kaohsiung", queries: ["路竹科學園區", "Kaohsiung Science Park", "路竹區, 高雄市"]}
+- {key: TW-ZHUNAN, country: TW, name: 竹南科學園區, area: "Miaoli", queries: ["竹南科學園區", "Zhunan Science Park"]}
+- {key: TW-LONGTAN, country: TW, name: 龍潭科學園區, area: "Taoyuan", queries: ["龍潭科學園區", "Longtan Science Park", "龍潭區, 桃園市"]}
+- {key: TW-GUISHAN, country: TW, name: 龜山工業區（桃園）, area: "Taoyuan", queries: ["龜山工業區", "Guishan Industrial Park Taoyuan"]}
+- {key: TW-PINGZHEN, country: TW, name: 平鎮工業區（桃園）, area: "Taoyuan", queries: ["平鎮工業區", "Pingzhen Industrial Park"]}
+- {key: TW-YOUSHI, country: TW, name: 幼獅工業區（桃園）, area: "Taoyuan", queries: ["幼獅工業區", "Youth Industrial Park Taoyuan", "楊梅區, 桃園市"]}
+- {key: TW-HUKOU, country: TW, name: 湖口工業區（新竹）, area: "Hsinchu", queries: ["湖口工業區", "Hukou Industrial Park", "湖口鄉, 新竹縣"]}
+- {key: TW-TAICHUNG, country: TW, name: 台中工業區, area: "Taichung", queries: ["台中工業區", "Taichung Industrial Park"]}
+- {key: TW-CHANGBIN, country: TW, name: 彰濱工業區, area: "Changhua", queries: ["彰濱工業區", "Changhua Coastal Industrial Park"]}
+- {key: TW-NANZIH, country: TW, name: 楠梓科技產業園區（高雄）, area: "Kaohsiung", queries: ["楠梓科技產業園區", "楠梓加工出口區", "Nanzih Export Processing Zone"]}
+- {key: TW-LINHAI, country: TW, name: 臨海工業區（高雄）, area: "Kaohsiung", queries: ["臨海工業區", "Linhai Industrial Park Kaohsiung"]}
+- {key: TW-LIZE, country: TW, name: 利澤工業區（宜蘭）, area: "Yilan", queries: ["利澤工業區", "Lize Industrial Park Yilan"]}
+- {key: TW-MEILUN, country: TW, name: 美崙工業區（花蓮）, area: "Hualien", queries: ["美崙工業區", "花蓮 美崙工業區", "Hualien"]}
+- {key: TW-NEIHU, country: TW, name: 內湖科技園區（台北）, area: "Neihu", queries: ["內湖科技園區", "Neihu Technology Park"]}
+- {key: TW-TUCHENG, country: TW, name: 土城工業區（新北）, area: "New Taipei", queries: ["土城工業區", "Tucheng Industrial Park"]}
+- {key: JP-NAKA, country: JP, name: 茨城縣那珂市, area: "Ibaraki", queries: ["那珂市, 茨城県", "Naka, Ibaraki"]}
+- {key: JP-HITACHINAKA, country: JP, name: 常陸那珂工業團地（茨城）, area: "Ibaraki", queries: ["常陸那珂工業団地", "ひたちなか市, 茨城県"]}
+- {key: JP-KITAKAMI, country: JP, name: 北上工業團地（岩手）, area: "Iwate", queries: ["北上工業団地", "北上市, 岩手県", "北上市, 岩手県"]}
+- {key: JP-OHIRA, country: JP, name: 第二仙台北部中核工業團地（宮城大衡）, area: "Miyagi", queries: ["第二仙台北部中核工業団地", "大衡村, 宮城県"]}
+- {key: JP-KORIYAMA, country: JP, name: 郡山西部工業團地（福島）, area: "Fukushima", queries: ["郡山西部工業団地", "郡山市, 福島県"]}
+- {key: JP-YONEZAWA, country: JP, name: 八幡原中核工業團地（山形米澤）, area: "Yamagata", queries: ["八幡原中核工業団地", "米沢市, 山形県"]}
+- {key: JP-SUWA, country: JP, name: 長野縣諏訪市, area: "Nagano", queries: ["諏訪市, 長野県", "Suwa, Nagano"]}
+- {key: JP-IZUMO, country: JP, name: 島根縣出雲市, area: "Shimane", queries: ["出雲市, 島根県", "Izumo, Shimane"]}
+- {key: JP-FUKUI, country: JP, name: 福井縣越前市, area: "Fukui", queries: ["越前市, 福井県", "Echizen, Fukui"]}
+- {key: JP-YASU, country: JP, name: 滋賀縣野洲市, area: "Shiga", queries: ["野洲市, 滋賀県", "Yasu, Shiga"]}
+- {key: JP-KIKUYO, country: JP, name: 熊本縣菊陽町, area: "Kumamoto", queries: ["菊陽町, 熊本県", "Kikuyo, Kumamoto"]}
+- {key: JP-HAMAMATSU, country: JP, name: 都田テクノポリス（濱松）, area: "Shizuoka", queries: ["都田テクノポリス", "浜松市, 静岡県"]}
+- {key: JP-KITAKYUSHU, country: JP, name: 北九州學術研究都市, area: "Fukuoka", queries: ["北九州学術研究都市", "北九州市, 福岡県"]}
+- {key: CN-GUANGMING, country: CN, name: 深圳光明科學城, area: "Shenzhen", queries: ["光明区, 深圳市", "Guangming District, Shenzhen"]}
+- {key: CN-SONGSHANHU, country: CN, name: 東莞松山湖高新區, area: "Dongguan", queries: ["松山湖", "Songshan Lake, Dongguan"]}
+- {key: CN-CHANGAN, country: CN, name: 東莞長安鎮, area: "Dongguan", queries: ["长安镇, 东莞市", "Chang'an, Dongguan"]}
+- {key: CN-SIP, country: CN, name: 蘇州工業園區, area: "Suzhou", queries: ["苏州工业园区", "Suzhou Industrial Park"]}
+- {key: CN-KUNSHAN, country: CN, name: 昆山經濟技術開發區, area: "Kunshan", queries: ["昆山经济技术开发区", "昆山市"]}
+- {key: CN-WUXI, country: CN, name: 無錫新吳區（高新區）, area: "Wuxi", queries: ["新吴区, 无锡市", "Xinwu District, Wuxi"]}
+- {key: CN-ZHANGJIANG, country: CN, name: 上海張江科學城, area: "Shanghai", queries: ["张江高科技园区", "Zhangjiang, Shanghai", "张江镇, 浦东新区, 上海市"]}
+- {key: CN-NINGBO, country: CN, name: 寧波北侖, area: "Ningbo", queries: ["北仑区, 宁波市", "Beilun, Ningbo"]}
+- {key: CN-XIAMEN, country: CN, name: 廈門火炬高新區, area: "Xiamen", queries: ["厦门火炬高技术产业开发区", "Xiamen Torch Hi-tech"]}
+- {key: CN-CHONGQING, country: CN, name: 重慶西永微電子產業園, area: "Chongqing", queries: ["西永微电园", "沙坪坝区, 重庆市"]}
+- {key: CN-CHENGDU, country: CN, name: 成都高新區, area: "Chengdu", queries: ["成都高新技术产业开发区", "高新区, 成都市"]}
+- {key: CN-WUHAN, country: CN, name: 武漢東湖高新區（光谷）, area: "Wuhan", queries: ["东湖新技术开发区", "Optics Valley, Wuhan"]}
+- {key: CN-TEDA, country: CN, name: 天津經濟技術開發區, area: "Tianjin", queries: ["天津经济技术开发区", "TEDA, Tianjin"]}
+- {key: CN-HUIZHOU, country: CN, name: 惠州仲愷高新區, area: "Huizhou", queries: ["仲恺高新区, 惠州市", "Zhongkai, Huizhou"]}
+- {key: TH-AMATACITY, country: TH, name: Amata City Chonburi 工業區, area: "Chon Buri", queries: ["Amata City Chonburi Industrial Estate"]}
+- {key: TH-HITECH, country: TH, name: Hi-Tech 工業區（大城府）, area: "Ayutthaya", queries: ["Hi-Tech Industrial Estate, Ayutthaya", "Bang Pa-in, Ayutthaya"]}
+- {key: TH-ROJANA, country: TH, name: Rojana 工業園區（大城府）, area: "Ayutthaya", queries: ["Rojana Industrial Park Ayutthaya"]}
+- {key: TH-NAVANAKORN, country: TH, name: Navanakorn 工業區（巴吞他尼）, area: "Pathum Thani", queries: ["Navanakorn Industrial Estate", "Khlong Luang, Pathum Thani"]}
+- {key: TH-NORTHERN, country: TH, name: 北部工業區（南奔府）, area: "Lamphun", queries: ["Northern Region Industrial Estate Lamphun", "Lamphun"]}
+- {key: TH-ESIE, country: TH, name: Eastern Seaboard 工業區（羅勇）, area: "Rayong", queries: ["Eastern Seaboard Industrial Estate Rayong"]}
+- {key: TH-BANGPOO, country: TH, name: Bangpoo 工業區（北欖府）, area: "Samut Prakan", queries: ["Bangpoo Industrial Estate", "Bang Pu, Samut Prakan"]}
+- {key: MY-BAYANLEPAS, country: MY, name: Bayan Lepas 自由工業區（檳城）, area: "Penang", queries: ["Bayan Lepas Free Industrial Zone", "Bayan Lepas, Penang"]}
+- {key: MY-KULIM, country: MY, name: Kulim Hi-Tech Park（吉打）, area: "Kedah", queries: ["Kulim Hi-Tech Park"]}
+- {key: MY-BATUKAWAN, country: MY, name: Batu Kawan 工業園區（檳城）, area: "Penang", queries: ["Batu Kawan Industrial Park", "Batu Kawan, Penang"]}
+- {key: MY-SENAI, country: MY, name: Senai 工業區（柔佛）, area: "Johor", queries: ["Senai Industrial Area", "Senai, Johor"]}
+- {key: MY-MELAKA, country: MY, name: Batu Berendam 自由貿易區（馬六甲）, area: "Malacca", queries: ["Batu Berendam Free Trade Zone", "Batu Berendam, Melaka"]}
+- {key: VN-VSIPBN, country: VN, name: VSIP 北寧工業區, area: "Bắc Ninh", queries: ["VSIP Bac Ninh", "Khu công nghiệp VSIP Bắc Ninh"]}
+- {key: VN-YENPHONG, country: VN, name: 安豐工業區（北寧）, area: "Bắc Ninh", queries: ["Khu công nghiệp Yên Phong", "Yen Phong Industrial Park"]}
+- {key: VN-QUANGCHAU, country: VN, name: 光州工業區（北寧，原屬北江）, area: "Bắc Ninh", queries: ["Khu công nghiệp Quang Châu", "Quang Chau Industrial Park"]}
+- {key: VN-THANGLONG, country: VN, name: 昇龍工業區（河內）, area: "Hà Nội", queries: ["Khu công nghiệp Thăng Long", "Thang Long Industrial Park Hanoi"]}
+- {key: VN-DINHVU, country: VN, name: Dinh Vu 工業區（海防）, area: "Hải Phòng", queries: ["Khu công nghiệp Đình Vũ", "Dinh Vu Industrial Zone"]}
+- {key: VN-VSIPBD, country: VN, name: VSIP 平陽工業區, area: "Bình Dương", queries: ["VSIP Binh Duong", "Khu công nghiệp Việt Nam - Singapore"]}
+- {key: VN-SHTP, country: VN, name: 西貢高科技園區, area: "Ho Chi Minh", queries: ["Saigon Hi-Tech Park", "Khu Công nghệ cao Thành phố Hồ Chí Minh"]}
+- {key: PH-TECHNOPARK, country: PH, name: Laguna Technopark, area: "Laguna", queries: ["Laguna Technopark", "Biñan, Laguna"]}
+- {key: PH-LISP, country: PH, name: Light Industry & Science Park（拉古納）, area: "Laguna", queries: ["Light Industry and Science Park", "Cabuyao, Laguna"]}
+- {key: PH-CARMELRAY, country: PH, name: Carmelray 工業園區（卡蘭巴）, area: "Laguna", queries: ["Carmelray Industrial Park", "Calamba, Laguna"]}
+- {key: PH-MACTAN, country: PH, name: Mactan 出口加工區（宿霧）, area: "Cebu", queries: ["Mactan Economic Zone", "Lapu-Lapu, Cebu"]}
+- {key: PH-CLARK, country: PH, name: Clark Freeport Zone, area: "Pampanga", queries: ["Clark Freeport Zone"]}
+- {key: MX-ELSALTO, country: MX, name: El Salto 工業區（瓜達拉哈拉）, area: "Jalisco", queries: ["El Salto, Jalisco"]}
+- {key: MX-TIJUANA, country: MX, name: 提華納, area: "Baja California", queries: ["Tijuana, Baja California"]}
+- {key: MX-JUAREZ, country: MX, name: 華雷斯城, area: "Chihuahua", queries: ["Ciudad Juárez, Chihuahua"]}
+- {key: MX-REYNOSA, country: MX, name: 雷諾薩, area: "Tamaulipas", queries: ["Reynosa, Tamaulipas"]}
+- {key: ID-BATAMINDO, country: ID, name: Batamindo 工業園區（巴淡島）, area: "Batam", queries: ["Batamindo Industrial Park", "Muka Kuning, Batam"]}

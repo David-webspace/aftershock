@@ -1,0 +1,14 @@
+{
+ "id": "us7000n7b8",
+ "title": "M 6.1 - 30 km SSE of Hualien City, Taiwan",
+ "place": "30 km SSE of Hualien City, Taiwan",
+ "magnitude": 6.1,
+ "time_ms": 1723764953943,
+ "lat": 23.7491,
+ "lon": 121.7669,
+ "depth_km": 14,
+ "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000n7b8",
+ "shakemap_version": "11",
+ "max_mmi": 6.031,
+ "pager_alert": "green"
+}

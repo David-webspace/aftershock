@@ -1,0 +1,7 @@
+# 情境：全部是 USGS 記錄的真實地震。重播時以發震時刻為 T0，合成的採購狀態依 T0 往前後推。
+- {event_id: us7000m9g4, key: hualien-2024, label: 2024 花蓮 M7.4, note: 台灣北部科學園區、工業區普遍感受 MMI 6 以上}
+- {event_id: us7000pn9s, key: myanmar-2025, label: 2025 緬甸曼德勒 M7.7, note: 震央遠在緬甸；泰國北部工業區有感，東部工業區震度低}
+- {event_id: official20110311054624120_30, key: tohoku-2011, label: 2011 東日本 M9.1, note: 日本東北、關東供應商大範圍受震}
+- {event_id: us6000pl8h, key: tainan-2025, label: 2025 台南玉井 M6.0, note: 南部科學園區鄰近，屬於需要確認、多半無礙的中型地震}
+- {event_id: us7000n7b8, key: hualien-2024-08, label: 2024-08 花蓮外海 M6.1, note: 東部有感，西部園區震度低，不應觸發停工判定}
+- {event_id: us7000nu90, key: noto-2024-11, label: 2024-11 能登 M6.1, note: 北陸地區有感，太平洋側供應商應不受影響}
