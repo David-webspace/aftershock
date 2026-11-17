@@ -29,13 +29,25 @@ class AnthropicLLM:
     def __init__(self) -> None:
         import anthropic
 
+        self._sdk = anthropic
         self.client = anthropic.Anthropic(api_key=settings.llm_api_key, base_url=settings.llm_base_url or None)
+        self.forced = True  # 有些模型（例如 Sonnet 5.5）不支援強制指定工具，第一次被拒後改用 auto
 
     def extract(self, system, user, tool_name, tool_description, schema) -> Extraction:
-        r = self.client.messages.create(
-            model=settings.llm_model, max_tokens=2048, system=system, messages=[{"role": "user", "content": user}],
-            tools=[{"name": tool_name, "description": tool_description, "input_schema": schema}],
-            tool_choice={"type": "tool", "name": tool_name})
+        kwargs = dict(model=settings.llm_model, max_tokens=2048, messages=[{"role": "user", "content": user}],
+                      tools=[{"name": tool_name, "description": tool_description, "input_schema": schema}])
+        r = None
+        if self.forced:
+            try:
+                r = self.client.messages.create(system=system, tool_choice={"type": "tool", "name": tool_name}, **kwargs)
+            except self._sdk.BadRequestError as e:
+                if "tool_choice" not in str(e):
+                    raise
+                self.forced = False
+        if r is None:
+            # 沒有呼叫工具時結果為空，解析端會交人確認，不會猜
+            r = self.client.messages.create(system=f"{system}\n\n請一定要呼叫 {tool_name} 工具回傳結果，不要只用文字回答。",
+                                            tool_choice={"type": "auto"}, **kwargs)
         call = next((b for b in r.content if b.type == "tool_use"), None)
         return Extraction(dict(call.input) if call else None, r.model, r.usage.input_tokens, r.usage.output_tokens)
 
