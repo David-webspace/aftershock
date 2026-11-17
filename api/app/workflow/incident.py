@@ -1,4 +1,4 @@
-"""應變案流程：開案 → 每家受影響供應商一封詢問信草稿 → 採購核准才寄出 → 回信解析 → 狀態回饋曝險 → 逾時追問。
+"""應變案流程：開案（風險快報給採購）→ 每家受影響供應商一封詢問信草稿 → 採購核准才寄出 → 回信或主動通報解析 → 狀態回饋曝險 → 逾時追問。
 
 事件時鐘（sim_hours）由畫面推進；模擬供應商依時鐘回信。每個寫入動作都記稽核。
 """
@@ -7,17 +7,17 @@ from collections import defaultdict
 from datetime import timedelta
 
 from fastapi import HTTPException
-from sqlalchemy import select, text, update
+from sqlalchemy import func, select, text, update
 from sqlalchemy.orm import Session
 
 from app import scenarios
 from app.auth import Principal
 from app.config import settings
-from app.impact.exposure import assess
+from app.impact.exposure import Assessment, SiteImpact, assess
 from app.llm import LLM
 from app.models import AuditLog, Contact, Incident, Message, SimReply, SiteStatus, Supplier, Truth, User
 from app.sim import supplier as sim
-from app.workflow import guard, mail, templates
+from app.workflow import alert, guard, mail, templates
 from app.workflow.parse import parse
 
 FOLLOW_UP_AFTER_HOURS = 24
@@ -55,17 +55,23 @@ def _open_parts(db: Session, supplier_id: str, site_keys: list[str]) -> list[dic
     return [{"pn": r["pn"], "n": r["n"], "qty": int(r["qty"])} for r in rows]
 
 
-def _draft(db: Session, inc: Incident, sup: Supplier, kind: str, author: str | None) -> Message:
+def _render(db: Session, inc: Incident, sup: Supplier, kind: str, only: set[str] | None = None,
+            after_notice: bool = False) -> tuple[Contact, str, str, str]:
     sc = scenarios.get(inc.scenario_key)
     lang = _lang(sup)
-    sites = _sites(db, inc.id, sup.id)
+    sites = [s for s in _sites(db, inc.id, sup.id) if only is None or s["key"] in only]
     contact = db.scalars(select(Contact).where(Contact.supplier_id == sup.id).order_by(Contact.id)).first()
     buyer = _buyer_for(db, sup.commodity)
     site_names = [s["name"] if lang.startswith("zh") else s["name_en"] for s in sites]
     subject, body = templates.render(
         kind, lang, token=_token(inc.id, sup.id), label=sc["label"] if lang.startswith("zh") else f"M{sc['magnitude']} {sc['place']}",
         contact=contact.name, place=sc["place"], mag=sc["magnitude"], event_date=sc["t0"].date(), sites=site_names,
-        parts=_open_parts(db, sup.id, [s["key"] for s in sites]), buyer=buyer.name if buyer else "Procurement")
+        parts=_open_parts(db, sup.id, [s["key"] for s in sites]), buyer=buyer.name if buyer else "Procurement", after_notice=after_notice)
+    return contact, subject, body, lang
+
+
+def _draft(db: Session, inc: Incident, sup: Supplier, kind: str, author: str | None) -> Message:
+    contact, subject, body, lang = _render(db, inc, sup, kind)
     msg = Message(incident_id=inc.id, supplier_id=sup.id, direction="out", kind=kind, status="draft", from_addr=settings.buyer_mailbox,
                   to_addr=contact.email, subject=subject, body=body, language=lang, token=_token(inc.id, sup.id), sim_hour=inc.sim_hours,
                   created_by=author)
@@ -74,11 +80,8 @@ def _draft(db: Session, inc: Incident, sup: Supplier, kind: str, author: str | N
     return msg
 
 
-def open_incident(db: Session, scenario_key: str, user: Principal) -> Incident:
-    a = assess(db, scenario_key)
-    inc = Incident(scenario_key=scenario_key, created_by=user.username, sim_hours=0, status="open")
-    db.add(inc)
-    db.flush()
+def affected_suppliers(a: Assessment) -> dict[str, list[SiteImpact]]:
+    """受影響的供應商 → 它受影響的廠區（只算目前有供貨給我們的廠區）。"""
     used = {s["supplier_site_id"] for e in a.exposures for s in e.sources}
     by_supplier = defaultdict(list)
     for site in a.sites:
@@ -87,14 +90,32 @@ def open_incident(db: Session, scenario_key: str, user: Principal) -> Incident:
         for s in site.suppliers:
             if s["supplier_site_id"] in used:
                 by_supplier[s["supplier_id"]].append(site)
-    for supplier_id, sites in sorted(by_supplier.items()):
+    return dict(sorted(by_supplier.items()))
+
+
+def open_incident(db: Session, scenario_key: str, user: Principal | None, a: Assessment | None = None) -> Incident:
+    """開案：建立各廠區狀態與詢問信草稿、排定模擬供應商的主動通報，並寄出風險快報。user 為空表示自動偵測開案。"""
+    a = a or assess(db, scenario_key)
+    inc = Incident(scenario_key=scenario_key, created_by=user.username if user else None, source="manual" if user else "auto",
+                   sim_hours=0, status="open")
+    db.add(inc)
+    db.flush()
+    by_supplier = affected_suppliers(a)
+    for supplier_id, sites in by_supplier.items():
         for site in sites:
             db.add(SiteStatus(incident_id=inc.id, supplier_id=supplier_id, site_key=site.site_key, level=site.level.key, mmi=site.mmi))
             db.add(Truth(incident_id=inc.id, supplier_id=supplier_id, site_key=site.site_key,
                          **sim.truth(scenario_key, supplier_id, site.site_key, site.level.key)))
         db.flush()
         _draft(db, inc, db.get(Supplier, supplier_id), "inquiry", None)
-    audit(db, user.username, "incident_open", inc.id, scenario=scenario_key, suppliers=len(by_supplier))
+        worst = max(sites, key=lambda s: s.level.rank).level.key
+        hour = sim.proactive_hour(scenario_key, supplier_id, worst)
+        if hour is not None:
+            db.add(SimReply(incident_id=inc.id, supplier_id=supplier_id, reply_to_message_id=None, due_hour=hour,
+                            style=sim.notice_style(scenario_key, supplier_id)))
+    alerts = alert.send(db, inc, a, by_supplier)
+    audit(db, user.username if user else None, "incident_open", inc.id, scenario=scenario_key, suppliers=len(by_supplier),
+          source=inc.source, alerts=alerts)
     db.commit()
     return inc
 
@@ -181,8 +202,9 @@ def _deliver_replies(db: Session, inc: Incident) -> int:
                      .order_by(SimReply.due_hour)).all()
     for r in due:
         sup = db.get(Supplier, r.supplier_id)
-        orig = db.get(Message, r.reply_to_message_id)
-        contact = db.scalars(select(Contact).where(Contact.email == orig.to_addr)).first()
+        orig = db.get(Message, r.reply_to_message_id) if r.reply_to_message_id else None
+        contact = db.scalars(select(Contact).where(Contact.email == orig.to_addr) if orig else
+                             select(Contact).where(Contact.supplier_id == sup.id).order_by(Contact.id)).first()
         lang = _lang(sup)
         sites = []
         for s in _sites(db, inc.id, sup.id):
@@ -190,15 +212,29 @@ def _deliver_replies(db: Session, inc: Incident) -> int:
             sites.append((s["name"] if lang.startswith("zh") else s["name_en"],
                           {"operating": t.operating, "capacity_pct": t.capacity_pct, "resume_day": t.resume_day, "damage": t.damage}))
         variant = int(sup.id[-1]) % 2
-        body = sim.reply_body(lang, contact.name, r.style, sites, sc["t0"].date(), variant)
-        _send_reply(contact.email, orig, body)
+        # 模擬供應商來信：寄到採購信箱（同樣是 .example 網域，只會進 Mailpit）
+        if orig is None:
+            subject, body = sim.notice(lang, sup.name, contact.name, r.style, sites, sc["t0"].date(), variant)
+            mail.send(contact.email, settings.buyer_mailbox, subject, body)
+        else:
+            body = sim.reply_body(lang, contact.name, r.style, sites, sc["t0"].date(), variant)
+            mail.send(contact.email, settings.buyer_mailbox, f"Re: {orig.subject}", body, in_reply_to=orig.smtp_message_id)
         r.delivered = True
     return len(due)
 
 
-def _send_reply(from_addr: str, orig: Message, body: str) -> None:
-    # 模擬供應商回信：寄到採購信箱（同樣是 .example 網域，只會進 Mailpit）
-    mail.send(from_addr, settings.buyer_mailbox, f"Re: {orig.subject}", body, in_reply_to=orig.smtp_message_id)
+def _notice_owner(db: Session, inc: Incident, from_addr: str) -> tuple[bool, Supplier | None]:
+    """沒有 In-Reply-To 的來信（主動通報）歸哪個應變案、哪家供應商。
+
+    寄件人是某家供應商登記的聯絡人 → 歸到「有這家供應商、最新開的」應變案；認不出寄件人 → 歸到最新的應變案交主管處理。
+    回傳（是否歸本案, 供應商）。沒有詢問信可以對，冒名的風險比回信高，所以只認登記過的寄件地址。
+    """
+    contact = db.scalars(select(Contact).where(Contact.email == from_addr)).first()
+    newest = select(func.max(Incident.id)).where(Incident.status == "open")
+    if contact is None:
+        return db.scalar(newest) == inc.id, None
+    owner = db.scalar(newest.where(Incident.id.in_(select(SiteStatus.incident_id).where(SiteStatus.supplier_id == contact.supplier_id))))
+    return owner == inc.id, db.get(Supplier, contact.supplier_id)
 
 
 def process_inbox(db: Session, inc: Incident, llm: LLM | None) -> int:
@@ -209,15 +245,28 @@ def process_inbox(db: Session, inc: Incident, llm: LLM | None) -> int:
         if m["mailpit_id"] in seen:
             continue
         orig = db.scalars(select(Message).where(Message.smtp_message_id == m["in_reply_to"])).first() if m["in_reply_to"] else None
-        if orig is None or orig.incident_id != inc.id:
-            continue
-        sup = db.get(Supplier, orig.supplier_id)
-        msg = Message(incident_id=inc.id, supplier_id=sup.id, direction="in", kind="reply", status="received", from_addr=m["from"],
-                      to_addr=settings.buyer_mailbox, subject=m["subject"], body=m["body"], language=orig.language, token=orig.token,
+        if orig is not None:
+            if orig.incident_id != inc.id:
+                continue
+            kind, sup = "reply", db.get(Supplier, orig.supplier_id)
+        else:
+            if m["created"] < inc.created_at:
+                continue  # 開案前就在信箱裡的信，跟這起地震無關
+            mine, sup = _notice_owner(db, inc, m["from"])
+            if not mine:
+                continue
+            kind = "notice"
+        msg = Message(incident_id=inc.id, supplier_id=sup.id if sup else None, direction="in", kind=kind, status="received",
+                      from_addr=m["from"], to_addr=settings.buyer_mailbox, subject=m["subject"], body=m["body"],
+                      language=orig.language if orig else (_lang(sup) if sup else "en"),
+                      token=orig.token if orig else (_token(inc.id, sup.id) if sup else f"AS-{inc.id}"),
                       sim_hour=inc.sim_hours, smtp_message_id=m["message_id"], in_reply_to=m["in_reply_to"], mailpit_id=m["mailpit_id"])
         db.add(msg)
         db.flush()
         count += 1
+        if sup is None:
+            msg.status, msg.parse_note = "needs_review", "寄件人不是任何供應商登記的聯絡人，未解析"
+            continue
         # 寄件人必須是這家供應商登記的聯絡人：冒名的信不解析、不採信，交人處理
         registered = set(db.scalars(select(Contact.email).where(Contact.supplier_id == sup.id)))
         if m["from"] not in registered:
@@ -225,12 +274,33 @@ def process_inbox(db: Session, inc: Incident, llm: LLM | None) -> int:
             continue
         if llm is None:
             msg.status, msg.parse_note = "needs_review", "尚未設定模型，請人工判讀"
-            continue
-        sites = _sites(db, inc.id, sup.id)
-        result = parse(llm, m["body"], sc["t0"].date(), sites)
-        msg.parsed = result
-        _apply(db, inc, sup.id, msg, result)
+        else:
+            result = parse(llm, m["body"], sc["t0"].date(), _sites(db, inc.id, sup.id))
+            msg.parsed = result
+            _apply(db, inc, sup.id, msg, result)
+        if kind == "notice":
+            _after_notice(db, inc, sup, msg)
     return count
+
+
+def _after_notice(db: Session, inc: Incident, sup: Supplier, notice: Message) -> None:
+    """主動通報之後，還沒寄的詢問信：狀況都有了就建議不寄；還缺的只問缺的廠區。"""
+    draft = db.scalars(select(Message).where(Message.incident_id == inc.id, Message.supplier_id == sup.id, Message.kind == "inquiry",
+                                             Message.status == "draft")).first()
+    if draft is None:
+        return
+    if notice.parsed is None:
+        draft.parse_note = f"供應商已在 T+{notice.sim_hour}h 主動通報，內容待人工判讀後再決定是否寄出"
+        return
+    statuses = db.scalars(select(SiteStatus).where(SiteStatus.incident_id == inc.id, SiteStatus.supplier_id == sup.id)).all()
+    missing = {s.site_key for s in statuses if s.state not in ("replied", "confirmed")}
+    if not missing:
+        draft.parse_note = f"供應商已在 T+{notice.sim_hour}h 主動通報，各廠區狀況都已取得，這封可以不寄（按退回）"
+        return
+    _, draft.subject, draft.body, _ = _render(db, inc, sup, "inquiry", only=missing, after_notice=True)
+    draft.guard_issues = guard.check(db, sup.id, draft.to_addr, draft.subject, draft.body)
+    names = "、".join(s["name"] for s in _sites(db, inc.id, sup.id) if s["key"] in missing)
+    draft.parse_note = f"供應商已在 T+{notice.sim_hour}h 主動通報；{names}還缺可用的資訊，這封已改成只問這些廠區"
 
 
 def _apply(db: Session, inc: Incident, supplier_id: str, msg: Message, result: dict) -> None:

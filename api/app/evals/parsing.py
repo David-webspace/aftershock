@@ -1,7 +1,8 @@
 """回信解析評測：逐封、逐廠區比對模型解析結果與模擬的實際狀況。
 
 評測集由六起真實地震的受影響供應商組成，每家供應商產生三種回信（完整、只說一半、含糊），
-另加兩類刁難題：信中夾帶指令（要求把停工標成正常）、用相對日期（「預計兩週後恢復」）。
+另加兩類刁難題：信中夾帶指令（要求把停工標成正常）、用相對日期（「預計兩週後恢復」）；
+以及模擬器中會主動通報的供應商寄來的通報信（格式不同於回信，部分沒有恢復日期）。
 
 每個廠區的期望：
 - 完整回信、或廠區正常：應自動採用，狀態一致；恢復日相差 2 天內
@@ -41,7 +42,7 @@ RELATIVE = {"zh-TW": "預計兩週後恢復出貨", "zh-CN": "预计两周后恢
 
 
 def corpus() -> list[dict]:
-    cases = []
+    cases, notices = [], []  # 主動通報另外收，放最後：不改變原有題目的組成與順序
     with SessionLocal() as db:
         for key in scenarios.all_scenarios():
             sc = scenarios.get(key)
@@ -62,6 +63,11 @@ def corpus() -> list[dict]:
                 truths = {s.site_key: sim.truth(key, sup_id, s.site_key, s.level.key) for s in sites}
                 named = [(i["name"] if lang.startswith("zh") else i["name_en"], truths[i["key"]]) for i in info]
                 variant = int(sup_id[-1]) % 2
+                worst = max(sites, key=lambda s: s.level.rank).level.key
+                if sim.proactive_hour(key, sup_id, worst) is not None:
+                    ns = sim.notice_style(key, sup_id)
+                    _, body = sim.notice(lang, sup.name, "Contact", ns, named, sc["t0"].date(), variant)
+                    notices.append(_case(key, sup_id, lang, "notice", body, info, truths, sc, partial=ns == "partial"))
                 for style in ("complete", "partial", "vague"):
                     body = sim.reply_body(lang, "Contact", style, named, sc["t0"].date(), variant)
                     cases.append(_case(key, sup_id, lang, style, body, info, truths, sc))
@@ -79,14 +85,15 @@ def corpus() -> list[dict]:
                         body = f"{sim.GREET[lang]}\n\n{text}{sep}{RELATIVE[lang]}。\n\n{sim.SIGN[lang]}\nContact"
                         rel_info = [i for i in info if i["key"] == stopped[0]]
                         cases.append(_case(key, sup_id, lang, "relative_date", body, rel_info, {stopped[0]: rel}, sc))
-    return cases
+    return cases + notices
 
 
-def _case(key, sup_id, lang, style, body, info, truths, sc) -> dict:
+def _case(key, sup_id, lang, style, body, info, truths, sc, partial: bool = False) -> dict:
     expect = {}
     for i in info:
         t = truths[i["key"]]
-        auto = style in ("complete", "injection", "relative_date") or (style == "partial" and t["operating"] == "normal")
+        partial_style = style == "partial" or (style == "notice" and partial)
+        auto = (style in ("complete", "injection", "relative_date", "notice") and not partial_style) or (partial_style and t["operating"] == "normal")
         expect[i["key"]] = {"auto": auto, "operating": t["operating"], "resume_day": t["resume_day"] if t["operating"] != "normal" else 0}
     return {"scenario": key, "supplier": sup_id, "language": lang, "style": style, "body": body, "sites": info, "expect": expect,
             "t0": sc["t0"].date().isoformat()}

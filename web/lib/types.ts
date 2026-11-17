@@ -6,10 +6,13 @@ export type Scenario = {
 
 export type LiveEvent = {
   id: string; magnitude: number; place: string; time: number; depth_km: number; shakemap: boolean; url: string;
-  nearest: { site: string; km: number }[];
+  incident_id: number | null; nearest: { site: string; km: number }[];
 };
 
-export type IncidentRow = { id: number; scenario: string; label: string; status: string; sim_hours: number; created_at: string; created_by: string };
+export type IncidentRow = {
+  id: number; scenario: string; label: string; status: string; sim_hours: number; created_at: string; created_by: string | null;
+  source: "manual" | "auto";
+};
 
 export type SiteImpact = {
   key: string; name: string; lat: number; lon: number; mmi: number | null; pga_g: number | null; level: string; level_label: string;

@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     mailpit_api: str = "http://localhost:8026"
     buyer_mailbox: str = "procurement@arcwell.example"
     allowed_recipient_suffix: str = ".example"
+    web_url: str = "http://localhost:3400"  # 風險快報裡的應變案連結
+
+    # 自動偵測：每隔幾分鐘查一次 USGS，有供應商或工廠達到「需要確認」就自動開案並寄風險快報；0＝關閉
+    auto_detect_minutes: int = 0
 
     llm_provider: str = "anthropic"  # anthropic / openai_compatible
     llm_api_key: str | None = None

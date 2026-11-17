@@ -1,39 +1,45 @@
 {
  "summary": {
   "model": "qwen3.5:9b",
-  "replies": 89,
-  "sites": 113,
+  "replies": 101,
+  "sites": 128,
   "verdicts": {
-   "auto_correct": 53,
-   "review_ok": 50,
-   "review_extra": 10
+   "auto_correct": 66,
+   "review_extra": 6,
+   "review_ok": 55,
+   "auto_wrong": 1
   },
   "by_style": {
-   "injection": {
-    "review_extra": 3,
-    "auto_correct": 15
+   "notice": {
+    "auto_correct": 9,
+    "review_extra": 1,
+    "review_ok": 5
    },
-   "partial": {
-    "auto_correct": 8,
-    "review_ok": 20,
-    "review_extra": 2
+   "relative_date": {
+    "auto_wrong": 1,
+    "auto_correct": 4
    },
    "complete": {
-    "auto_correct": 26,
-    "review_extra": 4
+    "auto_correct": 28,
+    "review_extra": 2
+   },
+   "partial": {
+    "review_extra": 1,
+    "review_ok": 20,
+    "auto_correct": 9
    },
    "vague": {
     "review_ok": 30
    },
-   "relative_date": {
-    "auto_correct": 4,
-    "review_extra": 1
+   "injection": {
+    "auto_correct": 16,
+    "review_extra": 2
    }
   },
-  "avg_seconds": 7.5,
+  "avg_seconds": 8.0,
   "tokens": [
-   66320,
-   9875
+   75809,
+   11412
   ]
  },
  "rows": [
@@ -45,9 +51,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     788,
-    148
+    175
    ],
-   "seconds": 16.8,
+   "seconds": 13.8,
    "sites": [
     {
      "site": "TW-PINGZHEN",
@@ -87,13 +93,13 @@
    "model": "qwen3.5:9b",
    "tokens": [
     783,
-    160
+    137
    ],
-   "seconds": 9.5,
+   "seconds": 9.0,
    "sites": [
     {
      "site": "TW-PINGZHEN",
-     "verdict": "auto_correct",
+     "verdict": "review_extra",
      "expect": {
       "auto": true,
       "operating": "normal",
@@ -102,7 +108,9 @@
      "got": {
       "operating": "normal",
       "resume_day": 0,
-      "issues": []
+      "issues": [
+       "判斷依據不在信件原文中"
+      ]
      }
     },
     {
@@ -131,9 +139,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     741,
-    131
+    115
    ],
-   "seconds": 8.0,
+   "seconds": 7.6,
    "sites": [
     {
      "site": "TW-PINGZHEN",
@@ -177,22 +185,22 @@
    "model": "qwen3.5:9b",
    "tokens": [
     813,
-    152
+    167
    ],
-   "seconds": 9.3,
+   "seconds": 10.4,
    "sites": [
     {
      "site": "TW-PINGZHEN",
-     "verdict": "review_extra",
+     "verdict": "auto_correct",
      "expect": {
       "auto": true,
       "operating": "normal",
       "resume_day": 0
      },
      "got": {
-      "operating": "unknown",
-      "resume_day": null,
-      "issues": null
+      "operating": "normal",
+      "resume_day": 0,
+      "issues": []
      }
     },
     {
@@ -206,7 +214,9 @@
      "got": {
       "operating": "unknown",
       "resume_day": null,
-      "issues": null
+      "issues": [
+       "供應商尚未說明現況"
+      ]
      }
     }
    ]
@@ -247,9 +257,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     718,
-    102
+    92
    ],
-   "seconds": 4.9,
+   "seconds": 4.3,
    "sites": [
     {
      "site": "TW-ZHUNAN",
@@ -277,7 +287,7 @@
     709,
     80
    ],
-   "seconds": 6.3,
+   "seconds": 6.0,
    "sites": [
     {
      "site": "TW-ZHUNAN",
@@ -307,7 +317,7 @@
     791,
     189
    ],
-   "seconds": 12.8,
+   "seconds": 12.0,
    "sites": [
     {
      "site": "TW-MEILUN",
@@ -347,9 +357,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     780,
-    157
+    144
    ],
-   "seconds": 9.7,
+   "seconds": 8.4,
    "sites": [
     {
      "site": "TW-MEILUN",
@@ -439,9 +449,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     816,
-    222
+    189
    ],
-   "seconds": 12.5,
+   "seconds": 11.0,
    "sites": [
     {
      "site": "TW-MEILUN",
@@ -481,9 +491,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     775,
-    166
+    152
    ],
-   "seconds": 11.6,
+   "seconds": 11.5,
    "sites": [
     {
      "site": "TW-HUKOU",
@@ -523,9 +533,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     770,
-    151
+    139
    ],
-   "seconds": 9.6,
+   "seconds": 8.8,
    "sites": [
     {
      "site": "TW-HUKOU",
@@ -567,9 +577,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     736,
-    170
+    130
    ],
-   "seconds": 10.5,
+   "seconds": 8.1,
    "sites": [
     {
      "site": "TW-HUKOU",
@@ -615,7 +625,7 @@
     800,
     166
    ],
-   "seconds": 10.7,
+   "seconds": 9.7,
    "sites": [
     {
      "site": "TW-HUKOU",
@@ -655,13 +665,13 @@
    "model": "qwen3.5:9b",
    "tokens": [
     727,
-    121
+    85
    ],
-   "seconds": 8.7,
+   "seconds": 6.9,
    "sites": [
     {
      "site": "TW-HUKOU",
-     "verdict": "auto_correct",
+     "verdict": "auto_wrong",
      "expect": {
       "auto": true,
       "operating": "stopped",
@@ -669,7 +679,7 @@
      },
      "got": {
       "operating": "stopped",
-      "resume_day": 14,
+      "resume_day": 20,
       "issues": []
      }
     }
@@ -683,9 +693,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     799,
-    162
+    230
    ],
-   "seconds": 11.6,
+   "seconds": 13.6,
    "sites": [
     {
      "site": "TW-ZHUNAN",
@@ -703,7 +713,7 @@
     },
     {
      "site": "TW-NEIHU",
-     "verdict": "auto_correct",
+     "verdict": "review_extra",
      "expect": {
       "auto": true,
       "operating": "stopped",
@@ -712,7 +722,9 @@
      "got": {
       "operating": "stopped",
       "resume_day": 4,
-      "issues": []
+      "issues": [
+       "判斷依據不在信件原文中"
+      ]
      }
     }
    ]
@@ -725,9 +737,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     788,
-    143
+    204
    ],
-   "seconds": 8.7,
+   "seconds": 12.3,
    "sites": [
     {
      "site": "TW-ZHUNAN",
@@ -773,7 +785,7 @@
     737,
     131
    ],
-   "seconds": 8.1,
+   "seconds": 8.2,
    "sites": [
     {
      "site": "TW-ZHUNAN",
@@ -817,9 +829,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     824,
-    143
+    162
    ],
-   "seconds": 8.9,
+   "seconds": 10.4,
    "sites": [
     {
      "site": "TW-ZHUNAN",
@@ -859,13 +871,13 @@
    "model": "qwen3.5:9b",
    "tokens": [
     731,
-    101
+    132
    ],
-   "seconds": 7.9,
+   "seconds": 9.9,
    "sites": [
     {
      "site": "TW-HSP",
-     "verdict": "review_extra",
+     "verdict": "auto_correct",
      "expect": {
       "auto": true,
       "operating": "partial",
@@ -874,9 +886,7 @@
      "got": {
       "operating": "partial",
       "resume_day": 4,
-      "issues": [
-       "判斷依據不在信件原文中"
-      ]
+      "issues": []
      }
     }
    ]
@@ -891,7 +901,7 @@
     725,
     96
    ],
-   "seconds": 6.8,
+   "seconds": 6.3,
    "sites": [
     {
      "site": "TW-HSP",
@@ -921,7 +931,7 @@
     705,
     78
    ],
-   "seconds": 5.7,
+   "seconds": 5.8,
    "sites": [
     {
      "site": "TW-HSP",
@@ -949,9 +959,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     731,
-    118
+    126
    ],
-   "seconds": 8.9,
+   "seconds": 9.5,
    "sites": [
     {
      "site": "TW-LIZE",
@@ -977,9 +987,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     725,
-    72
+    93
    ],
-   "seconds": 5.6,
+   "seconds": 6.2,
    "sites": [
     {
      "site": "TW-LIZE",
@@ -1009,7 +1019,7 @@
     710,
     78
    ],
-   "seconds": 5.6,
+   "seconds": 5.4,
    "sites": [
     {
      "site": "TW-LIZE",
@@ -1037,13 +1047,13 @@
    "model": "qwen3.5:9b",
    "tokens": [
     756,
-    109
+    84
    ],
-   "seconds": 7.0,
+   "seconds": 16.4,
    "sites": [
     {
      "site": "TW-LIZE",
-     "verdict": "review_extra",
+     "verdict": "auto_correct",
      "expect": {
       "auto": true,
       "operating": "stopped",
@@ -1051,11 +1061,8 @@
      },
      "got": {
       "operating": "stopped",
-      "resume_day": null,
-      "issues": [
-       "恢復日期早於地震或在一年以後",
-       "沒有恢復日期"
-      ]
+      "resume_day": 49,
+      "issues": []
      }
     }
    ]
@@ -1068,9 +1075,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     727,
-    83
+    84
    ],
-   "seconds": 5.6,
+   "seconds": 14.6,
    "sites": [
     {
      "site": "TW-LIZE",
@@ -1096,13 +1103,13 @@
    "model": "qwen3.5:9b",
    "tokens": [
     713,
-    79
+    135
    ],
-   "seconds": 6.5,
+   "seconds": 14.9,
    "sites": [
     {
      "site": "TW-TAICHUNG",
-     "verdict": "review_extra",
+     "verdict": "auto_correct",
      "expect": {
       "auto": true,
       "operating": "normal",
@@ -1111,9 +1118,7 @@
      "got": {
       "operating": "normal",
       "resume_day": 0,
-      "issues": [
-       "判斷依據不在信件原文中"
-      ]
+      "issues": []
      }
     }
    ]
@@ -1126,22 +1131,22 @@
    "model": "qwen3.5:9b",
    "tokens": [
     713,
-    95
+    76
    ],
-   "seconds": 4.3,
+   "seconds": 10.1,
    "sites": [
     {
      "site": "TW-TAICHUNG",
-     "verdict": "review_extra",
+     "verdict": "auto_correct",
      "expect": {
       "auto": true,
       "operating": "normal",
       "resume_day": 0
      },
      "got": {
-      "operating": "unknown",
-      "resume_day": null,
-      "issues": null
+      "operating": "normal",
+      "resume_day": 0,
+      "issues": []
      }
     }
    ]
@@ -1156,7 +1161,7 @@
     709,
     80
    ],
-   "seconds": 5.5,
+   "seconds": 12.9,
    "sites": [
     {
      "site": "TW-TAICHUNG",
@@ -1184,9 +1189,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     735,
-    96
+    134
    ],
-   "seconds": 6.5,
+   "seconds": 19.7,
    "sites": [
     {
      "site": "TW-TAICHUNG",
@@ -1212,9 +1217,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     729,
-    102
+    94
    ],
-   "seconds": 6.6,
+   "seconds": 6.3,
    "sites": [
     {
      "site": "TW-TAICHUNG",
@@ -1272,9 +1277,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     734,
-    109
+    105
    ],
-   "seconds": 8.5,
+   "seconds": 7.8,
    "sites": [
     {
      "site": "TH-NORTHERN",
@@ -1300,9 +1305,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     734,
-    142
+    117
    ],
-   "seconds": 7.7,
+   "seconds": 5.5,
    "sites": [
     {
      "site": "TH-NORTHERN",
@@ -1328,9 +1333,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     714,
-    82
+    73
    ],
-   "seconds": 6.5,
+   "seconds": 5.4,
    "sites": [
     {
      "site": "TH-NORTHERN",
@@ -1358,9 +1363,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     731,
-    114
+    85
    ],
-   "seconds": 8.4,
+   "seconds": 6.2,
    "sites": [
     {
      "site": "TH-NORTHERN",
@@ -1386,22 +1391,22 @@
    "model": "qwen3.5:9b",
    "tokens": [
     731,
-    121
+    81
    ],
-   "seconds": 6.7,
+   "seconds": 3.9,
    "sites": [
     {
      "site": "TH-NORTHERN",
-     "verdict": "review_extra",
+     "verdict": "auto_correct",
      "expect": {
       "auto": true,
       "operating": "normal",
       "resume_day": 0
      },
      "got": {
-      "operating": "unknown",
-      "resume_day": null,
-      "issues": null
+      "operating": "normal",
+      "resume_day": 0,
+      "issues": []
      }
     }
    ]
@@ -1414,9 +1419,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     714,
-    73
+    82
    ],
-   "seconds": 6.0,
+   "seconds": 5.7,
    "sites": [
     {
      "site": "TH-NORTHERN",
@@ -1444,9 +1449,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     732,
-    86
+    121
    ],
-   "seconds": 6.6,
+   "seconds": 7.4,
    "sites": [
     {
      "site": "TH-NORTHERN",
@@ -1472,9 +1477,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     732,
-    94
+    95
    ],
-   "seconds": 5.1,
+   "seconds": 4.4,
    "sites": [
     {
      "site": "TH-NORTHERN",
@@ -1500,9 +1505,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     724,
-    89
+    84
    ],
-   "seconds": 6.6,
+   "seconds": 5.8,
    "sites": [
     {
      "site": "TH-NORTHERN",
@@ -1530,9 +1535,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     732,
-    97
+    77
    ],
-   "seconds": 7.2,
+   "seconds": 5.5,
    "sites": [
     {
      "site": "TH-NORTHERN",
@@ -1558,9 +1563,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     732,
-    104
+    81
    ],
-   "seconds": 5.4,
+   "seconds": 3.7,
    "sites": [
     {
      "site": "TH-NORTHERN",
@@ -1588,7 +1593,7 @@
     724,
     84
    ],
-   "seconds": 6.0,
+   "seconds": 5.8,
    "sites": [
     {
      "site": "TH-NORTHERN",
@@ -1616,9 +1621,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     751,
-    138
+    113
    ],
-   "seconds": 8.5,
+   "seconds": 7.1,
    "sites": [
     {
      "site": "TH-NORTHERN",
@@ -1644,9 +1649,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     750,
-    98
+    140
    ],
-   "seconds": 6.6,
+   "seconds": 8.2,
    "sites": [
     {
      "site": "TH-NORTHERN",
@@ -1660,7 +1665,8 @@
       "operating": "partial",
       "resume_day": null,
       "issues": [
-       "沒有恢復日期"
+       "沒有恢復日期",
+       "同一廠區有互相矛盾的判斷"
       ]
      }
     }
@@ -1674,7 +1680,7 @@
    "model": "qwen3.5:9b",
    "tokens": [
     724,
-    84
+    89
    ],
    "seconds": 6.0,
    "sites": [
@@ -1706,7 +1712,7 @@
     745,
     114
    ],
-   "seconds": 8.5,
+   "seconds": 8.2,
    "sites": [
     {
      "site": "JP-YONEZAWA",
@@ -1734,7 +1740,7 @@
     740,
     84
    ],
-   "seconds": 5.9,
+   "seconds": 5.7,
    "sites": [
     {
      "site": "JP-YONEZAWA",
@@ -1764,7 +1770,7 @@
     719,
     75
    ],
-   "seconds": 5.5,
+   "seconds": 5.3,
    "sites": [
     {
      "site": "JP-YONEZAWA",
@@ -1792,9 +1798,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     767,
-    104
+    99
    ],
-   "seconds": 6.8,
+   "seconds": 6.7,
    "sites": [
     {
      "site": "JP-YONEZAWA",
@@ -1822,7 +1828,7 @@
     738,
     97
    ],
-   "seconds": 7.5,
+   "seconds": 7.7,
    "sites": [
     {
      "site": "JP-NAKA",
@@ -1848,9 +1854,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     733,
-    80
+    110
    ],
-   "seconds": 5.7,
+   "seconds": 7.1,
    "sites": [
     {
      "site": "JP-NAKA",
@@ -1862,9 +1868,9 @@
      },
      "got": {
       "operating": "stopped",
-      "resume_day": null,
+      "resume_day": 4,
       "issues": [
-       "沒有恢復日期"
+       "判斷依據不在信件原文中"
       ]
      }
     }
@@ -1878,9 +1884,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     709,
-    81
+    82
    ],
-   "seconds": 5.9,
+   "seconds": 5.7,
    "sites": [
     {
      "site": "JP-NAKA",
@@ -1894,6 +1900,7 @@
       "operating": "unknown",
       "resume_day": null,
       "issues": [
+       "恢復日期格式無法辨識",
        "供應商尚未說明現況"
       ]
      }
@@ -1908,7 +1915,7 @@
    "model": "qwen3.5:9b",
    "tokens": [
     760,
-    97
+    98
    ],
    "seconds": 6.8,
    "sites": [
@@ -1936,9 +1943,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     748,
-    117
+    151
    ],
-   "seconds": 7.4,
+   "seconds": 9.0,
    "sites": [
     {
      "site": "JP-NAKA",
@@ -1964,9 +1971,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     815,
-    175
+    174
    ],
-   "seconds": 11.4,
+   "seconds": 11.3,
    "sites": [
     {
      "site": "JP-NAKA",
@@ -2006,9 +2013,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     806,
-    175
+    189
    ],
-   "seconds": 10.8,
+   "seconds": 10.6,
    "sites": [
     {
      "site": "JP-NAKA",
@@ -2052,9 +2059,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     734,
-    115
+    117
    ],
-   "seconds": 7.8,
+   "seconds": 7.0,
    "sites": [
     {
      "site": "JP-NAKA",
@@ -2098,9 +2105,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     837,
-    251
+    174
    ],
-   "seconds": 14.0,
+   "seconds": 10.2,
    "sites": [
     {
      "site": "JP-NAKA",
@@ -2140,9 +2147,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     745,
-    75
+    89
    ],
-   "seconds": 5.6,
+   "seconds": 6.3,
    "sites": [
     {
      "site": "JP-YONEZAWA",
@@ -2230,9 +2237,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     767,
-    99
+    118
    ],
-   "seconds": 6.6,
+   "seconds": 7.3,
    "sites": [
     {
      "site": "JP-YONEZAWA",
@@ -2258,9 +2265,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     755,
-    99
+    96
    ],
-   "seconds": 6.5,
+   "seconds": 6.3,
    "sites": [
     {
      "site": "JP-YONEZAWA",
@@ -2286,9 +2293,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     739,
-    87
+    97
    ],
-   "seconds": 7.0,
+   "seconds": 7.4,
    "sites": [
     {
      "site": "JP-OHIRA",
@@ -2314,9 +2321,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     734,
-    80
+    94
    ],
-   "seconds": 5.6,
+   "seconds": 6.2,
    "sites": [
     {
      "site": "JP-OHIRA",
@@ -2327,11 +2334,10 @@
       "resume_day": 75
      },
      "got": {
-      "operating": "unknown",
+      "operating": "stopped",
       "resume_day": null,
       "issues": [
-       "判斷依據不在信件原文中",
-       "供應商尚未說明現況"
+       "沒有恢復日期"
       ]
      }
     }
@@ -2345,9 +2351,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     714,
-    81
+    71
    ],
-   "seconds": 5.7,
+   "seconds": 5.1,
    "sites": [
     {
      "site": "JP-OHIRA",
@@ -2375,9 +2381,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     761,
-    116
+    97
    ],
-   "seconds": 7.5,
+   "seconds": 6.4,
    "sites": [
     {
      "site": "JP-OHIRA",
@@ -2403,9 +2409,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     744,
-    153
+    97
    ],
-   "seconds": 10.1,
+   "seconds": 7.4,
    "sites": [
     {
      "site": "JP-HITACHINAKA",
@@ -2431,9 +2437,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     740,
-    83
+    84
    ],
-   "seconds": 5.8,
+   "seconds": 6.2,
    "sites": [
     {
      "site": "JP-HITACHINAKA",
@@ -2447,6 +2453,7 @@
       "operating": "stopped",
       "resume_day": null,
       "issues": [
+       "判斷依據不在信件原文中",
        "沒有恢復日期"
       ]
      }
@@ -2461,9 +2468,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     718,
-    75
+    84
    ],
-   "seconds": 5.4,
+   "seconds": 6.9,
    "sites": [
     {
      "site": "JP-HITACHINAKA",
@@ -2491,13 +2498,13 @@
    "model": "qwen3.5:9b",
    "tokens": [
     766,
-    99
+    161
    ],
-   "seconds": 6.7,
+   "seconds": 10.7,
    "sites": [
     {
      "site": "JP-HITACHINAKA",
-     "verdict": "auto_correct",
+     "verdict": "review_extra",
      "expect": {
       "auto": true,
       "operating": "stopped",
@@ -2506,7 +2513,9 @@
      "got": {
       "operating": "stopped",
       "resume_day": 21,
-      "issues": []
+      "issues": [
+       "同一廠區有互相矛盾的判斷"
+      ]
      }
     }
    ]
@@ -2519,13 +2528,13 @@
    "model": "qwen3.5:9b",
    "tokens": [
     755,
-    92
+    121
    ],
-   "seconds": 6.2,
+   "seconds": 8.2,
    "sites": [
     {
      "site": "JP-HITACHINAKA",
-     "verdict": "review_extra",
+     "verdict": "auto_correct",
      "expect": {
       "auto": true,
       "operating": "stopped",
@@ -2534,9 +2543,7 @@
      "got": {
       "operating": "stopped",
       "resume_day": 14,
-      "issues": [
-       "判斷依據不在信件原文中"
-      ]
+      "issues": []
      }
     }
    ]
@@ -2549,13 +2556,13 @@
    "model": "qwen3.5:9b",
    "tokens": [
     794,
-    160
+    149
    ],
-   "seconds": 10.5,
+   "seconds": 10.6,
    "sites": [
     {
      "site": "JP-KITAKAMI",
-     "verdict": "review_extra",
+     "verdict": "auto_correct",
      "expect": {
       "auto": true,
       "operating": "stopped",
@@ -2564,9 +2571,7 @@
      "got": {
       "operating": "stopped",
       "resume_day": 43,
-      "issues": [
-       "判斷依據不在信件原文中"
-      ]
+      "issues": []
      }
     },
     {
@@ -2593,9 +2598,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     789,
-    118
+    132
    ],
-   "seconds": 7.4,
+   "seconds": 8.1,
    "sites": [
     {
      "site": "JP-KITAKAMI",
@@ -2637,9 +2642,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     735,
-    82
+    134
    ],
-   "seconds": 5.7,
+   "seconds": 8.2,
    "sites": [
     {
      "site": "JP-KITAKAMI",
@@ -2669,7 +2674,7 @@
       "operating": "unknown",
       "resume_day": null,
       "issues": [
-       "信中沒有提到這個廠區"
+       "供應商尚未說明現況"
       ]
      }
     }
@@ -2683,9 +2688,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     816,
-    188
+    149
    ],
-   "seconds": 10.7,
+   "seconds": 9.5,
    "sites": [
     {
      "site": "JP-KITAKAMI",
@@ -2725,9 +2730,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     738,
-    106
+    92
    ],
-   "seconds": 8.0,
+   "seconds": 7.9,
    "sites": [
     {
      "site": "JP-KITAKAMI",
@@ -2753,9 +2758,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     735,
-    81
+    93
    ],
-   "seconds": 5.7,
+   "seconds": 6.3,
    "sites": [
     {
      "site": "JP-KITAKAMI",
@@ -2783,9 +2788,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     710,
-    74
+    82
    ],
-   "seconds": 5.3,
+   "seconds": 5.7,
    "sites": [
     {
      "site": "JP-KITAKAMI",
@@ -2813,9 +2818,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     714,
-    96
+    79
    ],
-   "seconds": 8.0,
+   "seconds": 6.9,
    "sites": [
     {
      "site": "TW-STSP",
@@ -2841,9 +2846,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     714,
-    74
+    88
    ],
-   "seconds": 3.5,
+   "seconds": 4.0,
    "sites": [
     {
      "site": "TW-STSP",
@@ -2871,7 +2876,7 @@
     707,
     78
    ],
-   "seconds": 5.6,
+   "seconds": 5.7,
    "sites": [
     {
      "site": "TW-STSP",
@@ -2899,9 +2904,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     744,
-    84
+    124
    ],
-   "seconds": 7.0,
+   "seconds": 7.8,
    "sites": [
     {
      "site": "TW-MEILUN",
@@ -2927,9 +2932,9 @@
    "model": "qwen3.5:9b",
    "tokens": [
     737,
-    92
+    86
    ],
-   "seconds": 6.3,
+   "seconds": 5.8,
    "sites": [
     {
      "site": "TW-MEILUN",
@@ -2959,7 +2964,7 @@
     712,
     80
    ],
-   "seconds": 5.6,
+   "seconds": 5.4,
    "sites": [
     {
      "site": "TW-MEILUN",
@@ -2974,6 +2979,396 @@
       "resume_day": null,
       "issues": [
        "供應商尚未說明現況"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "scenario": "hualien-2024",
+   "supplier": "S007",
+   "language": "zh-TW",
+   "style": "notice",
+   "model": "qwen3.5:9b",
+   "tokens": [
+    824,
+    174
+   ],
+   "seconds": 11.0,
+   "sites": [
+    {
+     "site": "TW-PINGZHEN",
+     "verdict": "auto_correct",
+     "expect": {
+      "auto": true,
+      "operating": "normal",
+      "resume_day": 0
+     },
+     "got": {
+      "operating": "normal",
+      "resume_day": 0,
+      "issues": []
+     }
+    },
+    {
+     "site": "TW-NEIHU",
+     "verdict": "review_extra",
+     "expect": {
+      "auto": true,
+      "operating": "stopped",
+      "resume_day": 3
+     },
+     "got": {
+      "operating": "stopped",
+      "resume_day": 3,
+      "issues": [
+       "判斷依據不在信件原文中"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "scenario": "hualien-2024",
+   "supplier": "S010",
+   "language": "zh-TW",
+   "style": "notice",
+   "model": "qwen3.5:9b",
+   "tokens": [
+    827,
+    162
+   ],
+   "seconds": 10.8,
+   "sites": [
+    {
+     "site": "TW-MEILUN",
+     "verdict": "auto_correct",
+     "expect": {
+      "auto": true,
+      "operating": "stopped",
+      "resume_day": 71
+     },
+     "got": {
+      "operating": "stopped",
+      "resume_day": 71,
+      "issues": []
+     }
+    },
+    {
+     "site": "TW-LONGTAN",
+     "verdict": "auto_correct",
+     "expect": {
+      "auto": true,
+      "operating": "stopped",
+      "resume_day": 2
+     },
+     "got": {
+      "operating": "stopped",
+      "resume_day": 2,
+      "issues": []
+     }
+    }
+   ]
+  },
+  {
+   "scenario": "hualien-2024",
+   "supplier": "S021",
+   "language": "zh-TW",
+   "style": "notice",
+   "model": "qwen3.5:9b",
+   "tokens": [
+    834,
+    162
+   ],
+   "seconds": 10.6,
+   "sites": [
+    {
+     "site": "TW-ZHUNAN",
+     "verdict": "auto_correct",
+     "expect": {
+      "auto": true,
+      "operating": "partial",
+      "resume_day": 3
+     },
+     "got": {
+      "operating": "partial",
+      "resume_day": 3,
+      "issues": []
+     }
+    },
+    {
+     "site": "TW-NEIHU",
+     "verdict": "auto_correct",
+     "expect": {
+      "auto": true,
+      "operating": "stopped",
+      "resume_day": 4
+     },
+     "got": {
+      "operating": "stopped",
+      "resume_day": 4,
+      "issues": []
+     }
+    }
+   ]
+  },
+  {
+   "scenario": "hualien-2024",
+   "supplier": "S024",
+   "language": "zh-TW",
+   "style": "notice",
+   "model": "qwen3.5:9b",
+   "tokens": [
+    760,
+    84
+   ],
+   "seconds": 7.9,
+   "sites": [
+    {
+     "site": "TW-HSP",
+     "verdict": "review_ok",
+     "expect": {
+      "auto": false,
+      "operating": "partial",
+      "resume_day": 4
+     },
+     "got": {
+      "operating": "partial",
+      "resume_day": null,
+      "issues": [
+       "沒有恢復日期"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "scenario": "myanmar-2025",
+   "supplier": "S019",
+   "language": "ja",
+   "style": "notice",
+   "model": "qwen3.5:9b",
+   "tokens": [
+    777,
+    110
+   ],
+   "seconds": 8.8,
+   "sites": [
+    {
+     "site": "TH-NORTHERN",
+     "verdict": "auto_correct",
+     "expect": {
+      "auto": true,
+      "operating": "normal",
+      "resume_day": 0
+     },
+     "got": {
+      "operating": "normal",
+      "resume_day": 0,
+      "issues": []
+     }
+    }
+   ]
+  },
+  {
+   "scenario": "myanmar-2025",
+   "supplier": "S028",
+   "language": "en",
+   "style": "notice",
+   "model": "qwen3.5:9b",
+   "tokens": [
+    770,
+    87
+   ],
+   "seconds": 6.1,
+   "sites": [
+    {
+     "site": "TH-NORTHERN",
+     "verdict": "auto_correct",
+     "expect": {
+      "auto": true,
+      "operating": "normal",
+      "resume_day": 0
+     },
+     "got": {
+      "operating": "normal",
+      "resume_day": 0,
+      "issues": []
+     }
+    }
+   ]
+  },
+  {
+   "scenario": "myanmar-2025",
+   "supplier": "S030",
+   "language": "en",
+   "style": "notice",
+   "model": "qwen3.5:9b",
+   "tokens": [
+    787,
+    108
+   ],
+   "seconds": 7.2,
+   "sites": [
+    {
+     "site": "TH-NORTHERN",
+     "verdict": "review_ok",
+     "expect": {
+      "auto": false,
+      "operating": "partial",
+      "resume_day": 2
+     },
+     "got": {
+      "operating": "partial",
+      "resume_day": null,
+      "issues": [
+       "沒有恢復日期"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "scenario": "tohoku-2011",
+   "supplier": "S001",
+   "language": "ja",
+   "style": "notice",
+   "model": "qwen3.5:9b",
+   "tokens": [
+    784,
+    84
+   ],
+   "seconds": 7.3,
+   "sites": [
+    {
+     "site": "JP-YONEZAWA",
+     "verdict": "review_ok",
+     "expect": {
+      "auto": false,
+      "operating": "stopped",
+      "resume_day": 3
+     },
+     "got": {
+      "operating": "stopped",
+      "resume_day": null,
+      "issues": [
+       "沒有恢復日期"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "scenario": "tohoku-2011",
+   "supplier": "S002",
+   "language": "ja",
+   "style": "notice",
+   "model": "qwen3.5:9b",
+   "tokens": [
+    782,
+    104
+   ],
+   "seconds": 8.1,
+   "sites": [
+    {
+     "site": "JP-NAKA",
+     "verdict": "auto_correct",
+     "expect": {
+      "auto": true,
+      "operating": "stopped",
+      "resume_day": 40
+     },
+     "got": {
+      "operating": "stopped",
+      "resume_day": 40,
+      "issues": []
+     }
+    }
+   ]
+  },
+  {
+   "scenario": "tohoku-2011",
+   "supplier": "S019",
+   "language": "ja",
+   "style": "notice",
+   "model": "qwen3.5:9b",
+   "tokens": [
+    782,
+    116
+   ],
+   "seconds": 9.1,
+   "sites": [
+    {
+     "site": "JP-OHIRA",
+     "verdict": "auto_correct",
+     "expect": {
+      "auto": true,
+      "operating": "stopped",
+      "resume_day": 75
+     },
+     "got": {
+      "operating": "stopped",
+      "resume_day": 75,
+      "issues": []
+     }
+    }
+   ]
+  },
+  {
+   "scenario": "tohoku-2011",
+   "supplier": "S020",
+   "language": "ja",
+   "style": "notice",
+   "model": "qwen3.5:9b",
+   "tokens": [
+    784,
+    96
+   ],
+   "seconds": 7.8,
+   "sites": [
+    {
+     "site": "JP-HITACHINAKA",
+     "verdict": "review_ok",
+     "expect": {
+      "auto": false,
+      "operating": "stopped",
+      "resume_day": 21
+     },
+     "got": {
+      "operating": "stopped",
+      "resume_day": null,
+      "issues": [
+       "沒有恢復日期"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "scenario": "tohoku-2011",
+   "supplier": "S023",
+   "language": "ja",
+   "style": "notice",
+   "model": "qwen3.5:9b",
+   "tokens": [
+    778,
+    120
+   ],
+   "seconds": 9.5,
+   "sites": [
+    {
+     "site": "JP-KITAKAMI",
+     "verdict": "review_ok",
+     "expect": {
+      "auto": false,
+      "operating": "partial",
+      "resume_day": 21
+     },
+     "got": {
+      "operating": "partial",
+      "resume_day": null,
+      "issues": [
+       "沒有恢復日期"
       ]
      }
     }

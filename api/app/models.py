@@ -157,7 +157,8 @@ class Incident(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     scenario_key: Mapped[str] = mapped_column(String(32))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    created_by: Mapped[str] = mapped_column(ForeignKey("users.username"))
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.username"))  # 自動偵測開的案為空
+    source: Mapped[str] = mapped_column(String(8), default="manual", server_default="manual")  # manual／auto
     sim_hours: Mapped[int] = mapped_column(Integer, default=0)
     status: Mapped[str] = mapped_column(String(12), default="open")
 
@@ -191,7 +192,7 @@ class Message(Base):
     incident_id: Mapped[int] = mapped_column(ForeignKey("incidents.id", ondelete="CASCADE"), index=True)
     supplier_id: Mapped[str | None] = mapped_column(ForeignKey("suppliers.id"), index=True)  # 內部通知（調撥、認證）為空
     direction: Mapped[str] = mapped_column(String(4))  # out／in
-    kind: Mapped[str] = mapped_column(String(16))  # inquiry／follow_up／reply／expedite／transfer／qualify
+    kind: Mapped[str] = mapped_column(String(16))  # inquiry／follow_up／reply／notice（供應商主動通報）／alert（內部風險快報）／expedite／transfer／qualify
     status: Mapped[str] = mapped_column(String(16))
     from_addr: Mapped[str] = mapped_column(String(128))
     to_addr: Mapped[str] = mapped_column(String(128))
@@ -240,13 +241,14 @@ class Truth(Base):
 
 
 class SimReply(Base):
-    """排定的模擬回信：某供應商在事件時鐘第幾小時回覆哪一封信；style 決定措辭（完整、部分、含糊、延遲）。"""
+    """排定的模擬來信：某供應商在事件時鐘第幾小時回覆哪一封信，或沒等詢問就主動通報（reply_to_message_id 為空）；
+    style 決定措辭（完整、部分、含糊、延遲）。"""
 
     __tablename__ = "sim_replies"
     id: Mapped[int] = mapped_column(primary_key=True)
     incident_id: Mapped[int] = mapped_column(ForeignKey("incidents.id", ondelete="CASCADE"), index=True)
     supplier_id: Mapped[str] = mapped_column(ForeignKey("suppliers.id"))
-    reply_to_message_id: Mapped[int] = mapped_column(ForeignKey("messages.id", ondelete="CASCADE"))
+    reply_to_message_id: Mapped[int | None] = mapped_column(ForeignKey("messages.id", ondelete="CASCADE"))  # 空＝主動通報
     due_hour: Mapped[int] = mapped_column(Integer)
     style: Mapped[str] = mapped_column(String(12))
     delivered: Mapped[bool] = mapped_column(Boolean, default=False)

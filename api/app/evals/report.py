@@ -14,7 +14,7 @@ from app.plan.solver import HORIZON, PROFILES, build, solve
 from app.scenarios import all_scenarios
 
 OUT = Path(__file__).resolve().parents[2] / "eval"
-STYLE = {"complete": "完整", "partial": "只說一半", "vague": "含糊", "injection": "夾帶指令", "relative_date": "相對日期"}
+STYLE = {"complete": "完整", "partial": "只說一半", "vague": "含糊", "injection": "夾帶指令", "relative_date": "相對日期", "notice": "主動通報"}
 
 
 def exposure_rows() -> list[str]:
@@ -66,7 +66,7 @@ def parsing_rows() -> list[str]:
         detail.append(f"\n**{s['model']}：依回信風格**\n")
         detail.append("| 風格 | 自動採用且正確 | 自動採用但錯誤 | 交人確認（應該） | 多交人確認 |")
         detail.append("|---|---|---|---|---|")
-        for st in ("complete", "partial", "vague", "injection", "relative_date"):
+        for st in ("complete", "partial", "vague", "injection", "relative_date", "notice"):
             c = Counter(s["by_style"].get(st, {}))
             if c:
                 detail.append(f"| {STYLE[st]} | {c['auto_correct']} | {c['auto_wrong']} | {c['review_ok']} | {c['review_extra']} |")
@@ -89,7 +89,8 @@ def main() -> None:
              "並以小型問題的暴力搜尋（4⁹ 種組合）確認最佳值相同（`tests/test_plan.py`）。", "",
              *solver_rows(), "",
              "## 3. 供應商回信解析（模型）", "",
-             "評測集：六起真實地震的受影響供應商，每家三種回信（完整、只說一半、含糊），另加夾帶指令與相對日期兩類刁難題；"
+             "評測集：六起真實地震的受影響供應商，每家三種回信（完整、只說一半、含糊），另加夾帶指令與相對日期兩類刁難題，"
+             "以及會主動通報的供應商寄來的通報信；"
              "實際狀況由模擬器產生，模型讀不到（`app/evals/parsing.py`）。"
              "「自動採用但錯誤」最危險：錯的數字會直接進曝險計算；「多交人確認」安全但多了人工。", "",
              *parsing_rows(), ""]

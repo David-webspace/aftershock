@@ -6,6 +6,7 @@
 - partial：講了狀態與損害，恢復日期「還在評估」→ 應判定需要人工確認或追問
 - vague：只說「正在確認，稍後回覆」→ 不能當成正常
 - silent：第一封不回，被追問後才完整回覆
+另有一部分供應商會在詢問之前主動通報（notice），見檔案後段。
 同一個（情境、供應商、廠區）每次產生的結果相同，評測可重現。
 """
 
@@ -111,3 +112,39 @@ def reply_body(lang: str, contact: str, style_key: str, sites: list[tuple[str, d
     else:
         parts = [_site_text(lang, name, t, t0, style_key != "partial", variant) for name, t in sites]
     return "\n\n".join([GREET[lang], *parts, f"{SIGN[lang]}\n{contact}"])
+
+
+# ── 主動通報：沒等我們詢問，供應商自己寄來的狀況說明 ─────────────────
+# 受災越重越可能主動通報；通報多半在震後半天內，早於詢問信的回覆
+
+PROACTIVE = {"severe_damage": 0.6, "damage_likely": 0.6, "disruption_possible": 0.4, "check": 0.2}
+
+
+def proactive_hour(scenario_key: str, supplier_id: str, worst_level: str) -> int | None:
+    r = _rng("proactive", scenario_key, supplier_id)
+    if r.random() >= PROACTIVE[worst_level]:
+        return None
+    return int(r.integers(2, 13))
+
+
+def notice_style(scenario_key: str, supplier_id: str) -> str:
+    # 震後頭幾個小時常常還不知道何時恢復：三成的通報只說狀態、沒有恢復日期
+    return "complete" if _rng("notice-style", scenario_key, supplier_id).random() < 0.7 else "partial"
+
+
+NOTICE_SUBJECT = {"zh-TW": "【地震影響通報】{company}", "zh-CN": "【地震影响通报】{company}", "ja": "【地震影響のご報告】{company}",
+                  "en": "Earthquake impact notice from {company}"}
+NOTICE_OPEN = {
+    "zh-TW": "各位客戶您好：\n\n{when}發生的地震，本公司已完成初步盤點，各廠區狀況通報如下。",
+    "zh-CN": "各位客户您好：\n\n{when}发生的地震，本公司已完成初步盘点，各厂区状况通报如下。",
+    "ja": "お客様各位\n\n{when}に発生した地震について、弊社拠点の初期確認が完了しましたので、状況をご報告いたします。",
+    "en": "Dear valued customer,\n\nFollowing the earthquake on {when}, we have completed an initial check of our facilities. Here is the current status.",
+}
+NOTICE_CLOSE = {"zh-TW": "後續如有變化，將再主動通知。", "zh-CN": "后续如有变化，将再主动通知。",
+                "ja": "状況に変化がございましたら、改めてご連絡いたします。", "en": "We will update you if anything changes."}
+
+
+def notice(lang: str, company: str, contact: str, style_key: str, sites: list[tuple[str, dict]], t0: date, variant: int) -> tuple[str, str]:
+    parts = [_site_text(lang, name, t, t0, style_key != "partial", variant) for name, t in sites]
+    body = "\n\n".join([NOTICE_OPEN[lang].format(when=_d(lang, t0)), *parts, NOTICE_CLOSE[lang], f"{SIGN[lang]}\n{contact}\n{company}"])
+    return NOTICE_SUBJECT[lang].format(company=company), body

@@ -19,7 +19,7 @@ async function Incidents() {
             <span className="num text-sm text-muted">#{r.id}</span>
             <span className="min-w-0 flex-1 font-medium break-words">{r.label}</span>
             <span className="num text-sm">{tPlus(r.sim_hours)}</span>
-            <span className="text-xs text-muted">{r.created_by}・{fmt(r.created_at)}</span>
+            <span className="text-xs text-muted">{r.source === "auto" ? "自動偵測" : r.created_by}・{fmt(r.created_at)}</span>
           </Link>
         </li>
       ))}
@@ -54,10 +54,19 @@ async function Scenarios() {
 }
 
 async function Live() {
-  const { events, error } = await apiGet<{ events: LiveEvent[]; error: string | null }>("/api/live");
-  if (error) return <p className="text-sm text-stop">{error}</p>;
-  if (!events.length) return <p className="text-sm text-muted">最近 7 天沒有規模 4.5 以上的地震發生在供應商或工廠 500 公里內。</p>;
+  const { events, error, auto_detect_minutes: every } = await apiGet<{ events: LiveEvent[]; error: string | null; auto_detect_minutes: number }>("/api/live");
+  const note = (
+    <p className="mb-3 text-sm text-muted">
+      USGS 最近 7 天規模 4.5 以上、距離我們的供應商或工廠 500 公里內的地震。有震度資料（ShakeMap）就能開案。
+      {every > 0 ? `自動偵測已開啟：每 ${every} 分鐘檢查一次，供應商廠區達到「需要確認」就自動開案，並寄風險快報給負責的採購。`
+        : "自動偵測未開啟（.env 的 AUTO_DETECT_MINUTES）。"}
+    </p>
+  );
+  if (error) return <>{note}<p className="text-sm text-stop">{error}</p></>;
+  if (!events.length) return <>{note}<p className="text-sm text-muted">最近 7 天沒有規模 4.5 以上的地震發生在供應商或工廠 500 公里內。</p></>;
   return (
+    <>
+    {note}
     <ul className="divide-y divide-rule border-y border-rule bg-sheet">
       {events.slice(0, 8).map((e) => (
         <li key={e.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-3 py-3">
@@ -69,10 +78,12 @@ async function Live() {
               {e.nearest.map((n) => `${n.site} ${n.km} km`).join("、")}
             </p>
           </div>
-          {e.shakemap ? <OpenButton scenario={`usgs:${e.id}`} /> : <span className="text-xs text-muted">尚無震度資料</span>}
+          {e.incident_id ? <Link href={`/incidents/${e.incident_id}`} className="text-sm text-action underline-offset-2 hover:underline">已開案 #{e.incident_id}</Link>
+            : e.shakemap ? <OpenButton scenario={`usgs:${e.id}`} /> : <span className="text-xs text-muted">尚無震度資料</span>}
         </li>
       ))}
     </ul>
+    </>
   );
 }
 
@@ -101,8 +112,7 @@ export default function Home() {
           </Suspense>
         </section>
         <section>
-          <h2 className="text-xl font-semibold">即時地震</h2>
-          <p className="mb-3 text-sm text-muted">USGS 最近 7 天規模 4.5 以上、距離我們的供應商或工廠 500 公里內的地震。有震度資料（ShakeMap）就能開案。</p>
+          <h2 className="mb-1 text-xl font-semibold">即時地震</h2>
           <Suspense fallback={<Loading text="向 USGS 讀取中…" />}>
             <Live />
           </Suspense>

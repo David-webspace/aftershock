@@ -49,6 +49,13 @@ FOLLOW_INTRO = {
     "en": "Dear {contact},\n\nWe have not yet received a reply to our earlier inquiry about the earthquake. Could you please confirm the status of the facilities below, especially the expected date to resume shipments?",
 }
 
+ACK_INTRO = {
+    "zh-TW": "{contact} 您好：\n\n感謝貴公司主動通報地震後的狀況。以下廠區還想再確認，尤其是預計恢復出貨的日期：",
+    "zh-CN": "{contact} 您好：\n\n感谢贵司主动通报地震后的状况。以下厂区还想再确认，尤其是预计恢复出货的日期：",
+    "ja": "{contact} 様\n\n地震後の状況について、ご丁寧にご報告いただきありがとうございます。下記拠点について、特に出荷再開の見込み日を改めてご確認させてください。",
+    "en": "Dear {contact},\n\nThank you for proactively letting us know how your facilities were affected. We would still like to confirm the status of the facilities below, especially the expected date to resume shipments:",
+}
+
 
 def when_text(lang: str, d: date) -> str:
     return {"zh-TW": f"{d.month} 月 {d.day} 日", "zh-CN": f"{d.month} 月 {d.day} 日", "ja": f"{d.month}月{d.day}日",
@@ -56,8 +63,11 @@ def when_text(lang: str, d: date) -> str:
 
 
 def render(kind: str, lang: str, *, token: str, label: str, contact: str, place: str, mag: float, event_date: date,
-           sites: list[str], parts: list[dict], buyer: str) -> tuple[str, str]:
-    if kind == "inquiry":
+           sites: list[str], parts: list[dict], buyer: str, after_notice: bool = False) -> tuple[str, str]:
+    if kind == "inquiry" and after_notice:
+        subject = SUBJECT[lang].format(token=token, label=label)
+        intro = ACK_INTRO[lang].format(contact=contact)
+    elif kind == "inquiry":
         subject = SUBJECT[lang].format(token=token, label=label)
         intro = INTRO[lang].format(contact=contact, when=when_text(lang, event_date), place=place, mag=mag, where=f"near {place}")
     else:

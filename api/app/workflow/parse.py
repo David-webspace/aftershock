@@ -3,6 +3,9 @@
 驗證規則：
 - 每個廠區的判斷都要附「逐字摘自信件」的依據；依據不在信裡，視為模型自己編的，該廠區交人確認
 - 停工或部分運作卻沒有恢復日期、或日期不合理（早於地震或一年以後），交人確認
+- 狀態與數字互相矛盾（部分運作卻沒有產能、正常卻產能不足或還有恢復日、停工卻還有產能），交人確認：
+  依據檢查只能抓到捏造，抓不到「引用正確但判讀錯誤」（例如依據寫全面停工、狀態卻填部分運作），這層補的是後者
+- 同一廠區回了多筆且內容不一致，交人確認（只取第一筆的話，夾帶指令寫出的那筆排在前面就會被採用）
 - 信中沒提到的廠區維持未知
 """
 
@@ -49,9 +52,15 @@ def parse(llm: LLM, body: str, t0: date, sites: list[dict]) -> dict:
     known = {s["key"] for s in sites}
     for item in ex.args["sites"]:
         key = item.get("site_key")
-        if key not in known or key in result["sites"]:
+        if key not in known:
             continue
-        result["sites"][key] = _validate(item, body, t0)
+        r = _validate(item, body, t0)
+        prev = result["sites"].get(key)
+        if prev is None:
+            result["sites"][key] = r
+        elif (prev["operating"], prev["resume_day"]) != (r["operating"], r["resume_day"]) and "同一廠區有互相矛盾的判斷" not in prev["issues"]:
+            prev["issues"].append("同一廠區有互相矛盾的判斷")
+            prev["usable"] = False
     for key in known - set(result["sites"]):
         result["sites"][key] = {"operating": "unknown", "capacity_pct": None, "resume_day": None, "damage": None, "evidence": None,
                                 "usable": False, "issues": ["信中沒有提到這個廠區"]}
@@ -79,12 +88,18 @@ def _validate(item: dict, body: str, t0: date) -> dict:
                 issues.append("恢復日期早於地震或在一年以後")
                 resume_day = None
     if op == "normal":
-        resume_day, cap = 0, cap if cap is not None else 100
+        if (cap is not None and cap < 100) or (resume_day or 0) > 0:
+            issues.append("判定正常，但產能或恢復日期顯示尚未完全恢復")
+        resume_day, cap = 0, 100
     elif op in ("stopped", "partial") and resume_day is None:
         issues.append("沒有恢復日期")
     elif op == "unknown":
         issues.append("供應商尚未說明現況")
+    if op == "partial" and (cap is None or not 0 < cap < 100):
+        issues.append("判定部分運作，但沒有 1～99% 的產能數字")
     if op == "stopped":
+        if cap:
+            issues.append("判定停工，但填了產能")
         cap = 0
     return {"operating": op, "capacity_pct": cap, "resume_day": resume_day, "damage": item.get("damage"), "evidence": evidence,
             "usable": not issues, "issues": issues}

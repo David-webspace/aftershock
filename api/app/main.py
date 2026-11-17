@@ -1,7 +1,9 @@
 """aftershock API。權限一律依登入身分在伺服器端判斷：採購只看得到自己負責料件類別的供應商往來。"""
 
 import logging
+import threading
 import time
+from contextlib import asynccontextmanager
 
 import httpx
 
@@ -13,17 +15,29 @@ from sqlalchemy.orm import Session
 from app import scenarios
 from app.auth import COOKIE, LOGIN_FAILED, Principal, authenticate, current_principal, issue_token, load_principal, require_role
 from app.config import settings
-from app.db import engine, get_db
+from app.db import SessionLocal, engine, get_db
 from app.impact.exposure import assess
 from app.ingest import usgs
 from app.llm import get_llm, not_configured
 from app.models import AuditLog, Incident
 from app.ratelimit import SlidingWindow
 from app.plan import execute
+from app.workflow import alert
 from app.workflow import incident as wf
 
 log = logging.getLogger("aftershock")
-app = FastAPI(title="aftershock", docs_url=None, redoc_url=None, openapi_url=None)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    stop = threading.Event()
+    if settings.auto_detect_minutes > 0:
+        threading.Thread(target=_auto_detect_loop, args=(stop,), daemon=True, name="auto-detect").start()
+    yield
+    stop.set()
+
+
+app = FastAPI(title="aftershock", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
 login_limit = SlidingWindow(10, 300)
 WORKERS = ("buyer", "manager")
 
@@ -98,7 +112,7 @@ def incident_open(body: OpenIn, p: Principal = Depends(require_role(*WORKERS)), 
 def incident_list(_: Principal = Depends(require_role(*WORKERS)), db: Session = Depends(get_db)) -> list[dict]:
     rows = db.scalars(select(Incident).order_by(Incident.id.desc()).limit(50)).all()
     return [{"id": i.id, "scenario": i.scenario_key, "label": scenarios.get(i.scenario_key)["label"], "status": i.status,
-             "sim_hours": i.sim_hours, "created_at": i.created_at.isoformat(), "created_by": i.created_by} for i in rows]
+             "sim_hours": i.sim_hours, "created_at": i.created_at.isoformat(), "created_by": i.created_by, "source": i.source} for i in rows]
 
 
 def _incident(db: Session, incident_id: int) -> Incident:
@@ -153,6 +167,9 @@ def _latest_plan(db: Session, incident_id: int) -> dict | None:
 def messages(incident_id: int, p: Principal = Depends(require_role(*WORKERS)), db: Session = Depends(get_db)) -> list[dict]:
     _incident(db, incident_id)
     cond, params = _commodity_filter(p)
+    if cond:
+        # 採購另外看得到寄給自己的風險快報
+        cond, params = f" AND ({cond[5:]} OR (m.kind = 'alert' AND m.to_addr = :mine))", {**params, "mine": alert.mailbox(p.username)}
     rows = db.execute(text(f"""
         SELECT m.id, m.supplier_id, sp.name AS supplier, sp.commodity, m.direction, m.kind, m.status, m.from_addr, m.to_addr,
                m.subject, m.body, m.language, m.sim_hour, m.approved_by, m.guard_issues, m.parsed, m.parse_note, m.plan_id
@@ -254,32 +271,82 @@ def map_sites(_: Principal = Depends(require_role(*WORKERS)), db: Session = Depe
 
 
 _live_cache: dict = {"at": 0.0, "data": None}
+_live_lock = threading.Lock()
 LIVE_FEED = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson"
+AUTO_MAX_AGE_HOURS = 48
+
+
+def _feed() -> dict:
+    """USGS 最近 7 天規模 4.5 以上的地震。快取 5 分鐘，避免每次開頁都打 USGS。"""
+    with _live_lock:
+        if _live_cache["data"] is None or time.time() - _live_cache["at"] > 300:
+            _live_cache.update(at=time.time(), data=httpx.get(LIVE_FEED, timeout=15).raise_for_status().json())
+        return _live_cache["data"]
+
+
+def _our_sites(db: Session) -> list[dict]:
+    return [dict(r) for r in db.execute(text(
+        "SELECT DISTINCT s.key, s.name, s.lat, s.lon FROM sites s LEFT JOIN supplier_sites ss ON ss.site_key = s.key "
+        "LEFT JOIN plants p ON p.site_key = s.key WHERE ss.id IS NOT NULL OR p.key IS NOT NULL")).mappings()]
+
+
+def _nearby(feed: dict, sites: list[dict]) -> list[tuple[dict, list]]:
+    out = []
+    for f in feed["features"]:
+        lon, lat, _ = f["geometry"]["coordinates"]
+        near = sorted(((_km(lat, lon, s["lat"], s["lon"]), s["name"]) for s in sites))[:3]
+        if near and near[0][0] <= 500:
+            out.append((f, near))
+    return out
 
 
 @app.get("/api/live")
 def live(_: Principal = Depends(require_role(*WORKERS)), db: Session = Depends(get_db)) -> dict:
-    """USGS 最近 7 天規模 4.5 以上的地震；列出離我們供應商或工廠 500 公里內的。快取 5 分鐘，避免每次開頁都打 USGS。"""
-    if _live_cache["data"] is None or time.time() - _live_cache["at"] > 300:
-        try:
-            feed = httpx.get(LIVE_FEED, timeout=15).raise_for_status().json()
-        except httpx.HTTPError:
-            log.exception("USGS feed unavailable")
-            return {"events": [], "error": "暫時連不上 USGS 即時資料"}
-        _live_cache.update(at=time.time(), data=feed)
-    sites = [dict(r) for r in db.execute(text(
-        "SELECT DISTINCT s.key, s.name, s.lat, s.lon FROM sites s LEFT JOIN supplier_sites ss ON ss.site_key = s.key "
-        "LEFT JOIN plants p ON p.site_key = s.key WHERE ss.id IS NOT NULL OR p.key IS NOT NULL")).mappings()]
+    """離我們供應商或工廠 500 公里內的即時地震；已經開案的附上案號。"""
+    try:
+        feed = _feed()
+    except httpx.HTTPError:
+        log.exception("USGS feed unavailable")
+        return {"events": [], "error": "暫時連不上 USGS 即時資料"}
+    opened = dict(db.execute(text("SELECT scenario_key, MIN(id) FROM incidents WHERE scenario_key LIKE 'usgs:%' GROUP BY scenario_key")).all())
     events = []
-    for f in _live_cache["data"]["features"]:
-        lon, lat, depth = f["geometry"]["coordinates"]
-        near = sorted(((_km(lat, lon, s["lat"], s["lon"]), s["name"]) for s in sites))[:3]
-        if near and near[0][0] <= 500:
+    for f, near in _nearby(feed, _our_sites(db)):
+        p = f["properties"]
+        events.append({"id": f["id"], "magnitude": p["mag"], "place": p["place"], "time": p["time"], "depth_km": f["geometry"]["coordinates"][2],
+                       "shakemap": "shakemap" in (p.get("types") or ""), "url": p["url"], "incident_id": opened.get(f"usgs:{f['id']}"),
+                       "nearest": [{"site": n, "km": round(d)} for d, n in near]})
+    return {"events": sorted(events, key=lambda e: -e["time"])[:20], "error": None,
+            "auto_detect_minutes": settings.auto_detect_minutes}
+
+
+def auto_detect_once() -> list[int]:
+    """近 48 小時、有 ShakeMap、離我們 500 公里內的地震：任一受影響供應商廠區達到「需要確認」就開案（同一起地震只開一次）。"""
+    opened = []
+    with SessionLocal() as db:
+        for f, _ in _nearby(_feed(), _our_sites(db)):
             p = f["properties"]
-            events.append({"id": f["id"], "magnitude": p["mag"], "place": p["place"], "time": p["time"], "depth_km": depth,
-                           "shakemap": "shakemap" in (p.get("types") or ""), "url": p["url"],
-                           "nearest": [{"site": n, "km": round(d)} for d, n in near]})
-    return {"events": sorted(events, key=lambda e: -e["time"])[:20], "error": None}
+            key = f"usgs:{f['id']}"
+            if ("shakemap" not in (p.get("types") or "") or time.time() - p["time"] / 1000 > AUTO_MAX_AGE_HOURS * 3600
+                    or not scenarios.is_valid(key) or db.scalar(select(Incident.id).where(Incident.scenario_key == key).limit(1))):
+                continue
+            try:
+                a = assess(db, key)
+            except (KeyError, httpx.HTTPError):
+                continue  # ShakeMap 還沒處理完，下一輪再試
+            if wf.affected_suppliers(a):
+                opened.append(wf.open_incident(db, key, None, a).id)
+    return opened
+
+
+def _auto_detect_loop(stop: threading.Event) -> None:
+    while True:
+        try:
+            if ids := auto_detect_once():
+                log.info("auto-detect opened incidents %s", ids)
+        except Exception:
+            log.exception("auto-detect failed")  # 背景執行緒：連不上 USGS 等錯誤只記錄，下一輪再試
+        if stop.wait(settings.auto_detect_minutes * 60):
+            return
 
 
 def _km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:

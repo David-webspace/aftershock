@@ -3,19 +3,28 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { OPERATING } from "@/lib/mmi";
-import type { Msg } from "@/lib/types";
+import type { Me, Msg } from "@/lib/types";
 import { post } from "./post";
 
-const KIND: Record<string, string> = { inquiry: "詢問", follow_up: "追問", reply: "回信", expedite: "追加出貨請求", transfer: "內部調撥", qualify: "備援認證" };
+const KIND: Record<string, string> = {
+  inquiry: "詢問", follow_up: "追問", reply: "回信", notice: "主動通報", alert: "風險快報", expedite: "追加出貨請求", transfer: "內部調撥", qualify: "備援認證",
+};
 const STATUS: Record<string, string> = {
   draft: "草稿・待核准", sent: "已寄出", rejected: "已退回", received: "已收到", parsed: "已解析採用", needs_review: "需人工確認",
 };
 
-export function MailTab({ messages }: { messages: Msg[] }) {
+export function MailTab({ messages, me }: { messages: Msg[]; me: Me }) {
+  const mine = messages.filter((m) => m.kind === "alert" && m.to_addr === `${me.username}@arcwell.example`);
   const drafts = messages.filter((m) => m.status === "draft");
-  const rest = messages.filter((m) => m.status !== "draft").reverse();
+  const rest = messages.filter((m) => m.status !== "draft" && !mine.includes(m)).reverse();
   return (
     <div className="space-y-6">
+      {mine.length > 0 && (
+        <section>
+          <h3 className="mb-2 text-sm font-medium">寄給你的風險快報</h3>
+          <ul className="space-y-2">{mine.map((m) => <MailCard key={m.id} m={m} />)}</ul>
+        </section>
+      )}
       <section>
         <h3 className="mb-2 text-sm font-medium">待核准 <span className="num text-muted">{drafts.length}</span></h3>
         {drafts.length ? <ul className="space-y-2">{drafts.map((m) => <MailCard key={m.id} m={m} />)}</ul>
@@ -54,8 +63,9 @@ function MailCard({ m }: { m: Msg }) {
           <span>{STATUS[m.status] ?? m.status}</span>
           <span className="num ml-auto">T+{m.sim_hour}h</span>
         </div>
-        <p className="mt-1 font-medium break-words">{m.supplier ?? "內部通知"}</p>
+        <p className="mt-1 font-medium break-words">{m.supplier ?? (m.kind === "alert" ? `給 ${m.to_addr}` : m.direction === "in" ? "寄件人不明" : "內部通知")}</p>
         <p className="text-sm break-words text-muted">{m.subject}</p>
+        {m.status === "draft" && m.parse_note && <p className="mt-1 text-xs break-words text-wait">{m.parse_note}</p>}
       </button>
       {open && (
         <div className="border-t border-rule p-3">
